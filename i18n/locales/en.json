@@ -72,7 +72,7 @@
     "keywords": "Keywords (for AI matching)",
     "addKeyword": "Add keyword",
     "contactEmail": "Contact Email",
-    "emailPlaceholder": "department@city.gov",
+    "emailPlaceholder": "department{'@'}city.gov",
     "active": "Active",
     "inactive": "Inactive",
     "activeDescription": "Inactive departments won't receive new issues",

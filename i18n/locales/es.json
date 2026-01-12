@@ -72,7 +72,7 @@
     "keywords": "Palabras clave (para IA)",
     "addKeyword": "Agregar palabra clave",
     "contactEmail": "Email de Contacto",
-    "emailPlaceholder": "departamento@ciudad.gov",
+    "emailPlaceholder": "departamento{'@'}ciudad.gov",
     "active": "Activo",
     "inactive": "Inactivo",
     "activeDescription": "Los departamentos inactivos no recibiran nuevos problemas",
