@@ -157,6 +157,7 @@ function close() {
             <UInput
               v-model="form.title"
               placeholder="Brief title for the issue"
+              class="w-full"
             />
           </UFormField>
 
@@ -165,6 +166,7 @@ function close() {
               v-model="form.description"
               placeholder="Describe the issue in detail..."
               :rows="3"
+              class="w-full"
             />
           </UFormField>
 
