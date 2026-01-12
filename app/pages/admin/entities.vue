@@ -199,123 +199,109 @@ async function saveEntity() {
       </UCard>
     </div>
 
-    <UModal v-model:open="isModalOpen">
-      <template #content>
-        <UCard>
-          <template #header>
-            <div class="flex items-center justify-between">
-              <h2 class="text-lg font-semibold">
-                {{ editingEntity ? 'Edit Department' : 'New Department' }}
-              </h2>
-              <UButton
-                icon="i-lucide-x"
-                color="neutral"
-                variant="ghost"
-                size="sm"
-                @click="isModalOpen = false"
-              />
-            </div>
-          </template>
+    <UModal
+      v-model:open="isModalOpen"
+      :title="editingEntity ? 'Edit Department' : 'New Department'"
+      :ui="{ footer: 'justify-end' }"
+    >
+      <template #body>
+        <form id="entity-form" class="space-y-4" @submit.prevent="saveEntity">
+          <UFormField label="Name" required>
+            <UInput
+              v-model="form.name"
+              placeholder="e.g., Water & Sewage"
+            />
+          </UFormField>
 
-          <form class="space-y-4" @submit.prevent="saveEntity">
-            <UFormField label="Name" required>
-              <UInput
-                v-model="form.name"
-                placeholder="e.g., Water & Sewage"
-              />
-            </UFormField>
-
-            <UFormField label="Icon">
-              <div class="flex flex-wrap gap-2">
-                <button
-                  v-for="opt in iconOptions"
-                  :key="opt.value"
-                  type="button"
-                  class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
-                  :class="form.icon === opt.value ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'"
-                  @click="form.icon = opt.value"
-                >
-                  <UIcon :name="opt.icon" class="w-5 h-5" />
-                </button>
-              </div>
-            </UFormField>
-
-            <UFormField label="Description">
-              <UTextarea
-                v-model="form.description"
-                placeholder="What issues does this department handle?"
-                :rows="2"
-              />
-            </UFormField>
-
-            <UFormField label="Keywords (for AI matching)">
-              <div class="space-y-2">
-                <div class="flex gap-2">
-                  <UInput
-                    v-model="newKeyword"
-                    placeholder="Add keyword"
-                    class="flex-1"
-                    @keyup.enter.prevent="addKeyword"
-                  />
-                  <UButton
-                    type="button"
-                    icon="i-lucide-plus"
-                    color="neutral"
-                    @click="addKeyword"
-                  />
-                </div>
-                <div v-if="form.keywords.length" class="flex flex-wrap gap-1">
-                  <UBadge
-                    v-for="keyword in form.keywords"
-                    :key="keyword"
-                    color="primary"
-                    variant="subtle"
-                    class="cursor-pointer"
-                    @click="removeKeyword(keyword)"
-                  >
-                    {{ keyword }}
-                    <UIcon name="i-lucide-x" class="w-3 h-3 ml-1" />
-                  </UBadge>
-                </div>
-              </div>
-            </UFormField>
-
-            <UFormField label="Contact Email">
-              <UInput
-                v-model="form.contactEmail"
-                type="email"
-                placeholder="department@city.gov"
-              />
-            </UFormField>
-
-            <UFormField>
-              <UCheckbox
-                v-model="form.isActive"
-                label="Active"
-                description="Inactive departments won't receive new issues"
-              />
-            </UFormField>
-
-            <div class="flex gap-3 pt-4">
-              <UButton
+          <UFormField label="Icon">
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="opt in iconOptions"
+                :key="opt.value"
                 type="button"
-                color="neutral"
-                variant="outline"
-                @click="isModalOpen = false"
+                class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
+                :class="form.icon === opt.value ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'"
+                @click="form.icon = opt.value"
               >
-                Cancel
-              </UButton>
-              <UButton
-                type="submit"
-                color="primary"
-                :loading="isSaving"
-                class="flex-1"
-              >
-                {{ editingEntity ? 'Update' : 'Create' }}
-              </UButton>
+                <UIcon :name="opt.icon" class="w-5 h-5" />
+              </button>
             </div>
-          </form>
-        </UCard>
+          </UFormField>
+
+          <UFormField label="Description">
+            <UTextarea
+              v-model="form.description"
+              placeholder="What issues does this department handle?"
+              :rows="2"
+            />
+          </UFormField>
+
+          <UFormField label="Keywords (for AI matching)">
+            <div class="space-y-2">
+              <div class="flex gap-2">
+                <UInput
+                  v-model="newKeyword"
+                  placeholder="Add keyword"
+                  class="flex-1"
+                  @keyup.enter.prevent="addKeyword"
+                />
+                <UButton
+                  type="button"
+                  icon="i-lucide-plus"
+                  color="neutral"
+                  @click="addKeyword"
+                />
+              </div>
+              <div v-if="form.keywords.length" class="flex flex-wrap gap-1">
+                <UBadge
+                  v-for="keyword in form.keywords"
+                  :key="keyword"
+                  color="primary"
+                  variant="subtle"
+                  class="cursor-pointer"
+                  @click="removeKeyword(keyword)"
+                >
+                  {{ keyword }}
+                  <UIcon name="i-lucide-x" class="w-3 h-3 ml-1" />
+                </UBadge>
+              </div>
+            </div>
+          </UFormField>
+
+          <UFormField label="Contact Email">
+            <UInput
+              v-model="form.contactEmail"
+              type="email"
+              placeholder="department@city.gov"
+            />
+          </UFormField>
+
+          <UFormField>
+            <UCheckbox
+              v-model="form.isActive"
+              label="Active"
+              description="Inactive departments won't receive new issues"
+            />
+          </UFormField>
+        </form>
+      </template>
+
+      <template #footer>
+        <UButton
+          color="neutral"
+          variant="outline"
+          @click="isModalOpen = false"
+        >
+          Cancel
+        </UButton>
+        <UButton
+          type="submit"
+          form="entity-form"
+          color="primary"
+          :loading="isSaving"
+        >
+          {{ editingEntity ? 'Update' : 'Create' }}
+        </UButton>
       </template>
     </UModal>
   </UContainer>

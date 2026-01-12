@@ -132,87 +132,73 @@ function close() {
 <template>
   <UModal
     v-model:open="isOpen"
+    title="Report an Issue"
+    :ui="{ body: 'max-h-[70vh] overflow-y-auto' }"
   >
-    <template #content>
-      <UCard class="max-h-[90vh] overflow-y-auto">
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold">Report an Issue</h2>
-            <UButton
-              icon="i-lucide-x"
-              color="neutral"
-              variant="ghost"
-              size="sm"
-              @click="close"
+    <template #body>
+      <form class="space-y-4" @submit.prevent="submitForm">
+        <UFormField label="Photo">
+          <IssueImageUploader v-model="form.image" />
+        </UFormField>
+
+        <UFormField label="Title" required>
+          <UInput
+            v-model="form.title"
+            placeholder="Brief title for the issue"
+            class="w-full"
+          />
+        </UFormField>
+
+        <UFormField label="Description" required>
+          <UTextarea
+            v-model="form.description"
+            placeholder="Describe the issue in detail..."
+            :rows="3"
+            class="w-full"
+          />
+        </UFormField>
+
+        <UFormField label="Location">
+          <IssueLocationPicker
+            v-model:latitude="form.latitude"
+            v-model:longitude="form.longitude"
+            v-model:address="form.address"
+          />
+        </UFormField>
+
+        <UFormField label="Department">
+          <div class="relative">
+            <IssueEntitySelector
+              v-model="form.entityId"
+              :ai-suggestion="aiSuggestion"
             />
-          </div>
-        </template>
-
-        <form class="space-y-4" @submit.prevent="submitForm">
-          <UFormField label="Photo">
-            <IssueImageUploader v-model="form.image" />
-          </UFormField>
-
-          <UFormField label="Title" required>
-            <UInput
-              v-model="form.title"
-              placeholder="Brief title for the issue"
-              class="w-full"
-            />
-          </UFormField>
-
-          <UFormField label="Description" required>
-            <UTextarea
-              v-model="form.description"
-              placeholder="Describe the issue in detail..."
-              :rows="3"
-              class="w-full"
-            />
-          </UFormField>
-
-          <UFormField label="Location">
-            <IssueLocationPicker
-              v-model:latitude="form.latitude"
-              v-model:longitude="form.longitude"
-              v-model:address="form.address"
-            />
-          </UFormField>
-
-          <UFormField label="Department">
-            <div class="relative">
-              <IssueEntitySelector
-                v-model="form.entityId"
-                :ai-suggestion="aiSuggestion"
-              />
-              <div
-                v-if="isClassifying"
-                class="absolute right-3 top-1/2 -translate-y-1/2"
-              >
-                <UIcon name="i-lucide-loader-2" class="w-4 h-4 animate-spin text-primary" />
-              </div>
+            <div
+              v-if="isClassifying"
+              class="absolute right-3 top-1/2 -translate-y-1/2"
+            >
+              <UIcon name="i-lucide-loader-2" class="w-4 h-4 animate-spin text-primary" />
             </div>
-          </UFormField>
-
-          <div class="flex gap-3 pt-4">
-            <UButton
-              type="button"
-              color="neutral"
-              variant="outline"
-              @click="close"
-            >
-              Cancel
-            </UButton>
-            <UButton
-              type="submit"
-              color="primary"
-              :loading="isSubmitting"
-              class="flex-1"
-            >
-              Submit Report
-            </UButton>
           </div>
-        </form>
-      </UCard>
+        </UFormField>
+      </form>
+    </template>
+
+    <template #footer>
+      <UButton
+        color="neutral"
+        variant="outline"
+        @click="close"
+      >
+        Cancel
+      </UButton>
+      <UButton
+        color="primary"
+        :loading="isSubmitting"
+        class="flex-1"
+        @click="submitForm"
+      >
+        Submit Report
+      </UButton>
     </template>
   </UModal>
 </template>
