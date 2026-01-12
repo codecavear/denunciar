@@ -204,6 +204,8 @@ async function saveEntity() {
       :title="editingEntity ? 'Edit Department' : 'New Department'"
       :ui="{ footer: 'justify-end' }"
     >
+      <span class="hidden" />
+
       <template #body>
         <form id="entity-form" class="space-y-4" @submit.prevent="saveEntity">
           <UFormField label="Name" required>

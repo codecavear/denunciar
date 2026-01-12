@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Issue, Entity } from '~/server/database/schema'
+import { LazyIssueCreateModal } from '#components'
 
 definePageMeta({
   layout: 'map'
@@ -14,12 +15,8 @@ type PublicIssue = Issue & {
 const config = useRuntimeConfig()
 const { loggedIn, user } = useUserSession()
 const toast = useToast()
-const { isOpen: modalIsOpen, initialLocation: modalInitialLocation, open: openModal, close: closeModal } = useIssueModal()
-
-const isModalOpen = computed({
-  get: () => modalIsOpen.value,
-  set: (value) => { modalIsOpen.value = value }
-})
+const overlay = useOverlay()
+const issueModal = overlay.create(LazyIssueCreateModal)
 
 const mapContainer = ref<HTMLDivElement>()
 const map = ref<google.maps.Map>()
@@ -28,12 +25,11 @@ const isMapLoaded = ref(false)
 
 const selectedIssue = ref<PublicIssue | null>(null)
 const isConfirming = ref(false)
-const clickedLocation = ref<{ lat: number; lng: number } | null>(null)
 
 const { data: issues, refresh: refreshIssues } = await useFetch<PublicIssue[]>('/api/issues/public')
 const { data: myConfirmations, refresh: refreshConfirmations } = await useFetch<string[]>('/api/issues/my-confirmations')
 
-const defaultCenter = { lat: 40.4168, lng: -3.7038 }
+const defaultCenter = { lat: -31.4201, lng: -64.1888 } // Cordoba, Argentina
 
 const statusColors: Record<string, string> = {
   pending: '#f59e0b',
@@ -100,7 +96,7 @@ function initMap() {
 
   map.value = new google.maps.Map(mapContainer.value, {
     center: defaultCenter,
-    zoom: 12,
+    zoom: 14,
     mapTypeControl: false,
     streetViewControl: false,
     fullscreenControl: false,
@@ -108,10 +104,13 @@ function initMap() {
   })
 
   // Click on map to create issue at location
-  map.value.addListener('click', (e: google.maps.MapMouseEvent) => {
+  map.value.addListener('click', async (e: google.maps.MapMouseEvent) => {
     if (e.latLng && loggedIn.value) {
-      clickedLocation.value = { lat: e.latLng.lat(), lng: e.latLng.lng() }
-      openModal(clickedLocation.value)
+      const location = { lat: e.latLng.lat(), lng: e.latLng.lng() }
+      const result = await issueModal.open({ initialLocation: location }).result
+      if (result) {
+        await onIssueCreated()
+      }
     }
   })
 
@@ -278,8 +277,11 @@ async function onIssueCreated() {
   addMarkers()
 }
 
-function openCreateModal() {
-  openModal()
+async function openCreateModal() {
+  const result = await issueModal.open({}).result
+  if (result) {
+    await onIssueCreated()
+  }
 }
 </script>
 
@@ -434,11 +436,5 @@ function openCreateModal() {
       </div>
     </Transition>
 
-    <!-- Issue creation modal -->
-    <IssueCreateModal
-      v-model:open="isModalOpen"
-      :initial-location="modalInitialLocation"
-      @created="onIssueCreated"
-    />
   </div>
 </template>

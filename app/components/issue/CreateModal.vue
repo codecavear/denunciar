@@ -1,18 +1,11 @@
 <script setup lang="ts">
 const props = defineProps<{
-  open: boolean
   initialLocation?: { lat: number; lng: number } | null
 }>()
 
 const emit = defineEmits<{
-  'update:open': [value: boolean]
-  'created': [issue: { id: string }]
+  close: [success: boolean, issue?: { id: string }]
 }>()
-
-const isOpen = computed({
-  get: () => props.open,
-  set: (value) => emit('update:open', value)
-})
 
 const toast = useToast()
 
@@ -32,26 +25,10 @@ const form = ref({
 const aiSuggestion = ref<{ entityId: string | null; confidence: number; reason: string } | null>(null)
 
 // Set initial location when provided
-watch(() => props.initialLocation, (loc) => {
-  if (loc) {
-    form.value.latitude = loc.lat
-    form.value.longitude = loc.lng
-  }
-}, { immediate: true })
-
-// Reset form when modal opens
-watch(() => props.open, (isOpen) => {
-  if (isOpen) {
-    form.value = {
-      title: '',
-      description: '',
-      image: null,
-      latitude: props.initialLocation?.lat ?? null,
-      longitude: props.initialLocation?.lng ?? null,
-      address: null,
-      entityId: null
-    }
-    aiSuggestion.value = null
+onMounted(() => {
+  if (props.initialLocation) {
+    form.value.latitude = props.initialLocation.lat
+    form.value.longitude = props.initialLocation.lng
   }
 })
 
@@ -114,8 +91,7 @@ async function submitForm() {
     })
 
     toast.add({ title: 'Report created successfully', color: 'success' })
-    emit('update:open', false)
-    emit('created', issue)
+    emit('close', true, issue)
   } catch (e) {
     toast.add({ title: 'Failed to create report', color: 'error' })
     console.error(e)
@@ -125,18 +101,18 @@ async function submitForm() {
 }
 
 function close() {
-  emit('update:open', false)
+  emit('close', false)
 }
 </script>
 
 <template>
   <UModal
-    v-model:open="isOpen"
     title="Report an Issue"
+    :close="{ onClick: close }"
     :ui="{ body: 'max-h-[70vh] overflow-y-auto' }"
   >
     <template #body>
-      <form class="space-y-4" @submit.prevent="submitForm">
+      <form id="issue-form" class="space-y-4" @submit.prevent="submitForm">
         <UFormField label="Photo">
           <IssueImageUploader v-model="form.image" />
         </UFormField>
