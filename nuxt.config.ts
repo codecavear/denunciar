@@ -36,7 +36,7 @@ export default defineNuxtConfig({
       { code: 'en', language: 'en-US', name: 'English', file: 'en.json' },
       { code: 'es', language: 'es-ES', name: 'Español', file: 'es.json' }
     ],
-    defaultLocale: 'en',
+    defaultLocale: 'es',
     lazy: true,
     langDir: 'locales',
     strategy: 'no_prefix',
@@ -45,7 +45,7 @@ export default defineNuxtConfig({
       cookieKey: 'i18n_redirected',
       redirectOn: 'root',
       alwaysRedirect: false,
-      fallbackLocale: 'en'
+      fallbackLocale: 'es'
     }
   },
 
