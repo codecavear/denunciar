@@ -1,0 +1,77 @@
+{
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "signInAccess": "Sign in to report issues in your community",
+    "continueGoogle": "Continue with Google",
+    "agreementText": "By signing in, you agree to our Terms of Service."
+  },
+  "nav": {
+    "dashboard": "My Reports",
+    "newIssue": "Report Issue",
+    "getStarted": "Get Started"
+  },
+  "home": {
+    "title": "Report Issues in Your ",
+    "titleHighlight": "Community",
+    "description": "Easily report problems in your neighborhood - potholes, broken streetlights, water leaks, and more. Our AI automatically routes your report to the right government department.",
+    "seo": {
+      "title": "Denunciar - Community Issue Reporting",
+      "description": "Report problems in your community and get them resolved. AI-powered routing to government departments."
+    },
+    "hero": {
+      "getStarted": "Report an Issue",
+      "learnMore": "Learn More"
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "description": "Report issues in three simple steps",
+      "steps": {
+        "report": {
+          "title": "1. Report",
+          "description": "Take a photo and describe the issue. Add the location using our map picker or GPS."
+        },
+        "ai": {
+          "title": "2. AI Routes",
+          "description": "Our AI analyzes your report and automatically suggests the right government department."
+        },
+        "track": {
+          "title": "3. Track",
+          "description": "Monitor the status of your report and get updates as it's being resolved."
+        }
+      }
+    },
+    "features": {
+      "title": "Features",
+      "description": "Everything you need to report and track community issues",
+      "photo": {
+        "title": "Photo Evidence",
+        "description": "Upload photos to clearly document the issue and help responders understand the problem."
+      },
+      "location": {
+        "title": "Precise Location",
+        "description": "Use GPS, search by address, or drop a pin on the map to mark exactly where the issue is."
+      },
+      "ai": {
+        "title": "AI Classification",
+        "description": "Our AI analyzes your report and automatically routes it to the appropriate department."
+      },
+      "tracking": {
+        "title": "Status Tracking",
+        "description": "Track your reports from submission to resolution. Get notified when there are updates."
+      },
+      "multilang": {
+        "title": "Multiple Languages",
+        "description": "Available in English and Spanish. More languages coming soon."
+      },
+      "secure": {
+        "title": "Secure & Private",
+        "description": "Your data is protected with industry-standard security. Sign in securely with Google."
+      }
+    },
+    "cta": {
+      "title": "Ready to Make a Difference?",
+      "description": "Join your community in reporting and resolving local issues. Every report helps make our neighborhoods better.",
+      "getStarted": "Start Reporting"
+    }
+  }
+}
