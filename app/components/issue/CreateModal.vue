@@ -7,6 +7,7 @@ const emit = defineEmits<{
   close: [success: boolean, issue?: { id: string }]
 }>()
 
+const { t } = useI18n()
 const toast = useToast()
 
 const isSubmitting = ref(false)
@@ -69,7 +70,7 @@ watch(() => form.value.image, () => {
 
 async function submitForm() {
   if (!form.value.title || !form.value.description) {
-    toast.add({ title: 'Please fill in title and description', color: 'error' })
+    toast.add({ title: t('issue.fillRequired'), color: 'error' })
     return
   }
 
@@ -90,10 +91,10 @@ async function submitForm() {
       }
     })
 
-    toast.add({ title: 'Report created successfully', color: 'success' })
+    toast.add({ title: t('issue.reportCreated'), color: 'success' })
     emit('close', true, issue)
   } catch (e) {
-    toast.add({ title: 'Failed to create report', color: 'error' })
+    toast.add({ title: t('issue.reportFailed'), color: 'error' })
     console.error(e)
   } finally {
     isSubmitting.value = false
@@ -107,34 +108,34 @@ function close() {
 
 <template>
   <UModal
-    title="Report an Issue"
+    :title="t('issue.reportAnIssue')"
     :close="{ onClick: close }"
     :ui="{ body: 'max-h-[70vh] overflow-y-auto' }"
   >
     <template #body>
       <form id="issue-form" class="space-y-4" @submit.prevent="submitForm">
-        <UFormField label="Photo">
+        <UFormField :label="t('issue.photo')">
           <IssueImageUploader v-model="form.image" />
         </UFormField>
 
-        <UFormField label="Title" required>
+        <UFormField :label="t('issue.title')" required>
           <UInput
             v-model="form.title"
-            placeholder="Brief title for the issue"
+            :placeholder="t('issue.titlePlaceholder')"
             class="w-full"
           />
         </UFormField>
 
-        <UFormField label="Description" required>
+        <UFormField :label="t('issue.description')" required>
           <UTextarea
             v-model="form.description"
-            placeholder="Describe the issue in detail..."
+            :placeholder="t('issue.descriptionPlaceholder')"
             :rows="3"
             class="w-full"
           />
         </UFormField>
 
-        <UFormField label="Location">
+        <UFormField :label="t('issue.location')">
           <IssueLocationPicker
             v-model:latitude="form.latitude"
             v-model:longitude="form.longitude"
@@ -142,7 +143,7 @@ function close() {
           />
         </UFormField>
 
-        <UFormField label="Department">
+        <UFormField :label="t('issue.department')">
           <div class="relative">
             <IssueEntitySelector
               v-model="form.entityId"
@@ -165,7 +166,7 @@ function close() {
         variant="outline"
         @click="close"
       >
-        Cancel
+        {{ t('common.cancel') }}
       </UButton>
       <UButton
         color="primary"
@@ -173,7 +174,7 @@ function close() {
         class="flex-1"
         @click="submitForm"
       >
-        Submit Report
+        {{ t('issue.submitReport') }}
       </UButton>
     </template>
   </UModal>

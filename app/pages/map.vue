@@ -15,6 +15,7 @@ type PublicIssue = Issue & {
 const config = useRuntimeConfig()
 const { loggedIn, user } = useUserSession()
 const toast = useToast()
+const { t } = useI18n()
 const overlay = useOverlay()
 const issueModal = overlay.create(LazyIssueCreateModal)
 
@@ -38,12 +39,12 @@ const statusColors: Record<string, string> = {
   closed: '#6b7280'
 }
 
-const statusLabels: Record<string, string> = {
-  pending: 'Pending',
-  in_progress: 'In Progress',
-  resolved: 'Resolved',
-  closed: 'Closed'
-}
+const statusLabels = computed(() => ({
+  pending: t('status.pending'),
+  in_progress: t('status.in_progress'),
+  resolved: t('status.resolved'),
+  closed: t('status.closed')
+}))
 
 // Entity icon mapping (fallback for entities without custom icon)
 const entityIcons: Record<string, string> = {
@@ -226,7 +227,7 @@ function hasConfirmed(issue: PublicIssue) {
 
 async function toggleConfirm(issue: PublicIssue) {
   if (!loggedIn.value) {
-    toast.add({ title: 'Please login to confirm issues', color: 'warning' })
+    toast.add({ title: t('auth.signInAccess'), color: 'warning' })
     return
   }
 
@@ -240,7 +241,7 @@ async function toggleConfirm(issue: PublicIssue) {
       selectedIssue.value = issues.value?.find(i => i.id === issue.id) || null
     }
   } catch (e) {
-    toast.add({ title: 'Failed to confirm issue', color: 'error' })
+    toast.add({ title: t('issue.confirmFailed'), color: 'error' })
   } finally {
     isConfirming.value = false
   }
@@ -254,9 +255,9 @@ async function markResolved(issue: PublicIssue) {
     })
     await refreshIssues()
     selectedIssue.value = null
-    toast.add({ title: 'Issue marked as resolved', color: 'success' })
+    toast.add({ title: t('map.issueMarkedResolved'), color: 'success' })
   } catch (e) {
-    toast.add({ title: 'Failed to update issue', color: 'error' })
+    toast.add({ title: t('issue.reportFailed'), color: 'error' })
   }
 }
 
@@ -296,7 +297,7 @@ async function openCreateModal() {
 
     <!-- Legend -->
     <div class="absolute bottom-4 left-4 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-3 z-40">
-      <div class="text-xs font-medium text-gray-500 mb-2">Status</div>
+      <div class="text-xs font-medium text-gray-500 mb-2">{{ t('map.legend') }}</div>
       <div class="space-y-1">
         <div v-for="(color, status) in statusColors" :key="status" class="flex items-center gap-2 text-sm">
           <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: color }" />
@@ -304,7 +305,7 @@ async function openCreateModal() {
         </div>
       </div>
       <div class="text-xs text-gray-400 mt-3">
-        Click map to report
+        {{ t('map.clickToReport') }}
       </div>
     </div>
 
@@ -317,7 +318,7 @@ async function openCreateModal() {
         class="shadow-lg"
         @click="openCreateModal"
       >
-        Report Issue
+        {{ t('map.reportIssue') }}
       </UButton>
     </div>
 
@@ -369,7 +370,7 @@ async function openCreateModal() {
               </UBadge>
             </div>
             <p class="text-sm text-gray-500 mt-1">
-              Reported by {{ selectedIssue.user?.name || 'Anonymous' }} on {{ formatDate(selectedIssue.createdAt) }}
+              {{ t('map.reportedBy') }} {{ selectedIssue.user?.name || t('map.anonymous') }} {{ t('map.on') }} {{ formatDate(selectedIssue.createdAt) }}
             </p>
           </div>
 
@@ -395,7 +396,7 @@ async function openCreateModal() {
             <UIcon name="i-lucide-users" class="w-5 h-5 text-gray-400" />
             <span class="text-gray-600 dark:text-gray-400">
               <strong class="text-gray-900 dark:text-white">{{ selectedIssue.confirmationCount }}</strong>
-              {{ selectedIssue.confirmationCount === 1 ? 'person' : 'people' }} confirmed this issue
+              {{ selectedIssue.confirmationCount === 1 ? t('map.personConfirmed') : t('map.peopleConfirmed') }}
             </span>
           </div>
 
@@ -410,7 +411,7 @@ async function openCreateModal() {
               @click="toggleConfirm(selectedIssue)"
             >
               <UIcon :name="hasConfirmed(selectedIssue) ? 'i-lucide-check' : 'i-lucide-thumbs-up'" class="w-4 h-4 mr-1" />
-              {{ hasConfirmed(selectedIssue) ? 'Confirmed' : 'Confirm Issue' }}
+              {{ hasConfirmed(selectedIssue) ? t('map.confirmed') : t('map.confirmIssue') }}
             </UButton>
 
             <UButton
@@ -420,7 +421,7 @@ async function openCreateModal() {
               @click="markResolved(selectedIssue)"
             >
               <UIcon name="i-lucide-check-circle" class="w-4 h-4 mr-1" />
-              Mark Resolved
+              {{ t('map.markResolved') }}
             </UButton>
 
             <UButton
@@ -429,7 +430,7 @@ async function openCreateModal() {
               variant="outline"
               :to="`/issues/${selectedIssue.id}`"
             >
-              Edit
+              {{ t('common.edit') }}
             </UButton>
           </div>
         </div>

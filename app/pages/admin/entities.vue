@@ -5,6 +5,7 @@ definePageMeta({
   middleware: 'auth'
 })
 
+const { t } = useI18n()
 const toast = useToast()
 
 const { data: entities, refresh } = await useFetch<Entity[]>('/api/entities')
@@ -78,7 +79,7 @@ function removeKeyword(keyword: string) {
 
 async function saveEntity() {
   if (!form.value.name) {
-    toast.add({ title: 'Name is required', color: 'error' })
+    toast.add({ title: t('entities.nameRequired'), color: 'error' })
     return
   }
 
@@ -89,18 +90,18 @@ async function saveEntity() {
         method: 'PUT',
         body: form.value
       })
-      toast.add({ title: 'Entity updated', color: 'success' })
+      toast.add({ title: t('entities.entityUpdated'), color: 'success' })
     } else {
       await $fetch('/api/entities', {
         method: 'POST',
         body: form.value
       })
-      toast.add({ title: 'Entity created', color: 'success' })
+      toast.add({ title: t('entities.entityCreated'), color: 'success' })
     }
     await refresh()
     isModalOpen.value = false
   } catch (e) {
-    toast.add({ title: 'Failed to save entity', color: 'error' })
+    toast.add({ title: t('entities.entityFailed'), color: 'error' })
     console.error(e)
   } finally {
     isSaving.value = false
@@ -113,10 +114,10 @@ async function saveEntity() {
     <div class="flex items-center justify-between mb-8">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-          Government Departments
+          {{ t('entities.title') }}
         </h1>
         <p class="text-gray-500 mt-1">
-          Manage departments that handle reported issues
+          {{ t('entities.subtitle') }}
         </p>
       </div>
       <UButton
@@ -124,17 +125,17 @@ async function saveEntity() {
         color="primary"
         @click="openCreateModal"
       >
-        Add Department
+        {{ t('entities.addDepartment') }}
       </UButton>
     </div>
 
     <div v-if="!entities?.length" class="text-center py-12">
       <UIcon name="i-lucide-building-2" class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600" />
       <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">
-        No departments yet
+        {{ t('entities.noDepartments') }}
       </h3>
       <p class="mt-2 text-gray-500">
-        Create departments to route issues automatically
+        {{ t('entities.createToRoute') }}
       </p>
       <UButton
         icon="i-lucide-plus"
@@ -142,7 +143,7 @@ async function saveEntity() {
         class="mt-4"
         @click="openCreateModal"
       >
-        Add Department
+        {{ t('entities.addDepartment') }}
       </UButton>
     </div>
 
@@ -167,7 +168,7 @@ async function saveEntity() {
                 variant="subtle"
                 size="xs"
               >
-                {{ entity.isActive ? 'Active' : 'Inactive' }}
+                {{ entity.isActive ? t('entities.active') : t('entities.inactive') }}
               </UBadge>
             </div>
             <p v-if="entity.description" class="text-sm text-gray-500 mt-1 line-clamp-2">
@@ -201,21 +202,21 @@ async function saveEntity() {
 
     <UModal
       v-model:open="isModalOpen"
-      :title="editingEntity ? 'Edit Department' : 'New Department'"
+      :title="editingEntity ? t('entities.editDepartment') : t('entities.newDepartment')"
       :ui="{ footer: 'justify-end' }"
     >
       <span class="hidden" />
 
       <template #body>
         <form id="entity-form" class="space-y-4" @submit.prevent="saveEntity">
-          <UFormField label="Name" required>
+          <UFormField :label="t('entities.name')" required>
             <UInput
               v-model="form.name"
-              placeholder="e.g., Water & Sewage"
+              :placeholder="t('entities.namePlaceholder')"
             />
           </UFormField>
 
-          <UFormField label="Icon">
+          <UFormField :label="t('entities.icon')">
             <div class="flex flex-wrap gap-2">
               <button
                 v-for="opt in iconOptions"
@@ -230,20 +231,19 @@ async function saveEntity() {
             </div>
           </UFormField>
 
-          <UFormField label="Description">
+          <UFormField :label="t('issue.description')">
             <UTextarea
               v-model="form.description"
-              placeholder="What issues does this department handle?"
               :rows="2"
             />
           </UFormField>
 
-          <UFormField label="Keywords (for AI matching)">
+          <UFormField :label="t('entities.keywords')">
             <div class="space-y-2">
               <div class="flex gap-2">
                 <UInput
                   v-model="newKeyword"
-                  placeholder="Add keyword"
+                  :placeholder="t('entities.addKeyword')"
                   class="flex-1"
                   @keyup.enter.prevent="addKeyword"
                 />
@@ -270,19 +270,19 @@ async function saveEntity() {
             </div>
           </UFormField>
 
-          <UFormField label="Contact Email">
+          <UFormField :label="t('entities.contactEmail')">
             <UInput
               v-model="form.contactEmail"
               type="email"
-              placeholder="department@city.gov"
+              :placeholder="t('entities.emailPlaceholder')"
             />
           </UFormField>
 
           <UFormField>
             <UCheckbox
               v-model="form.isActive"
-              label="Active"
-              description="Inactive departments won't receive new issues"
+              :label="t('entities.active')"
+              :description="t('entities.activeDescription')"
             />
           </UFormField>
         </form>
@@ -294,7 +294,7 @@ async function saveEntity() {
           variant="outline"
           @click="isModalOpen = false"
         >
-          Cancel
+          {{ t('common.cancel') }}
         </UButton>
         <UButton
           type="submit"
@@ -302,7 +302,7 @@ async function saveEntity() {
           color="primary"
           :loading="isSaving"
         >
-          {{ editingEntity ? 'Update' : 'Create' }}
+          {{ editingEntity ? t('common.update') : t('common.create') }}
         </UButton>
       </template>
     </UModal>
