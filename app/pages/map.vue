@@ -14,7 +14,12 @@ type PublicIssue = Issue & {
 const config = useRuntimeConfig()
 const { loggedIn, user } = useUserSession()
 const toast = useToast()
-const issueModal = useIssueModal()
+const { isOpen: modalIsOpen, initialLocation: modalInitialLocation, open: openModal, close: closeModal } = useIssueModal()
+
+const isModalOpen = computed({
+  get: () => modalIsOpen.value,
+  set: (value) => { modalIsOpen.value = value }
+})
 
 const mapContainer = ref<HTMLDivElement>()
 const map = ref<google.maps.Map>()
@@ -106,7 +111,7 @@ function initMap() {
   map.value.addListener('click', (e: google.maps.MapMouseEvent) => {
     if (e.latLng && loggedIn.value) {
       clickedLocation.value = { lat: e.latLng.lat(), lng: e.latLng.lng() }
-      issueModal.open(clickedLocation.value)
+      openModal(clickedLocation.value)
     }
   })
 
@@ -274,7 +279,7 @@ async function onIssueCreated() {
 }
 
 function openCreateModal() {
-  issueModal.open()
+  openModal()
 }
 </script>
 
@@ -431,9 +436,8 @@ function openCreateModal() {
 
     <!-- Issue creation modal -->
     <IssueCreateModal
-      :open="issueModal.isOpen.value"
-      :initial-location="issueModal.initialLocation.value"
-      @update:open="issueModal.isOpen.value = $event"
+      v-model:open="isModalOpen"
+      :initial-location="modalInitialLocation"
       @created="onIssueCreated"
     />
   </div>
