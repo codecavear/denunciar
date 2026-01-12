@@ -24,6 +24,7 @@ export const entities = pgTable('entities', {
   name: text('name').notNull(),
   description: text('description'),
   keywords: text('keywords').array(),
+  icon: text('icon').default('i-lucide-alert-circle'),
   contactEmail: text('contact_email'),
   isActive: boolean('is_active').default(true).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -54,16 +55,28 @@ export const issues = pgTable('issues', {
 export type Issue = typeof issues.$inferSelect
 export type NewIssue = typeof issues.$inferInsert
 
+// Issue Confirmations table (users confirming they see the same issue)
+export const issueConfirmations = pgTable('issue_confirmations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  issueId: uuid('issue_id').references(() => issues.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
+})
+
+export type IssueConfirmation = typeof issueConfirmations.$inferSelect
+export type NewIssueConfirmation = typeof issueConfirmations.$inferInsert
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
-  issues: many(issues)
+  issues: many(issues),
+  confirmations: many(issueConfirmations)
 }))
 
 export const entitiesRelations = relations(entities, ({ many }) => ({
   issues: many(issues)
 }))
 
-export const issuesRelations = relations(issues, ({ one }) => ({
+export const issuesRelations = relations(issues, ({ one, many }) => ({
   user: one(users, {
     fields: [issues.userId],
     references: [users.id]
@@ -71,5 +84,17 @@ export const issuesRelations = relations(issues, ({ one }) => ({
   entity: one(entities, {
     fields: [issues.entityId],
     references: [entities.id]
+  }),
+  confirmations: many(issueConfirmations)
+}))
+
+export const issueConfirmationsRelations = relations(issueConfirmations, ({ one }) => ({
+  issue: one(issues, {
+    fields: [issueConfirmations.issueId],
+    references: [issues.id]
+  }),
+  user: one(users, {
+    fields: [issueConfirmations.userId],
+    references: [users.id]
   })
 }))

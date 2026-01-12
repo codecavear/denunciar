@@ -17,9 +17,25 @@ const form = ref({
   name: '',
   description: '',
   keywords: [] as string[],
+  icon: 'i-lucide-alert-circle',
   contactEmail: '',
   isActive: true
 })
+
+const iconOptions = [
+  { label: 'Water', value: 'i-lucide-droplets', icon: 'i-lucide-droplets' },
+  { label: 'Road', value: 'i-lucide-road', icon: 'i-lucide-road' },
+  { label: 'Light', value: 'i-lucide-lightbulb', icon: 'i-lucide-lightbulb' },
+  { label: 'Trash', value: 'i-lucide-trash-2', icon: 'i-lucide-trash-2' },
+  { label: 'Trees', value: 'i-lucide-trees', icon: 'i-lucide-trees' },
+  { label: 'Safety', value: 'i-lucide-shield-alert', icon: 'i-lucide-shield-alert' },
+  { label: 'Building', value: 'i-lucide-building', icon: 'i-lucide-building' },
+  { label: 'Alert', value: 'i-lucide-alert-circle', icon: 'i-lucide-alert-circle' },
+  { label: 'Zap', value: 'i-lucide-zap', icon: 'i-lucide-zap' },
+  { label: 'Flame', value: 'i-lucide-flame', icon: 'i-lucide-flame' },
+  { label: 'Car', value: 'i-lucide-car', icon: 'i-lucide-car' },
+  { label: 'Bus', value: 'i-lucide-bus', icon: 'i-lucide-bus' }
+]
 
 const newKeyword = ref('')
 
@@ -29,6 +45,7 @@ function openCreateModal() {
     name: '',
     description: '',
     keywords: [],
+    icon: 'i-lucide-alert-circle',
     contactEmail: '',
     isActive: true
   }
@@ -41,6 +58,7 @@ function openEditModal(entity: Entity) {
     name: entity.name,
     description: entity.description || '',
     keywords: entity.keywords || [],
+    icon: entity.icon || 'i-lucide-alert-circle',
     contactEmail: entity.contactEmail || '',
     isActive: entity.isActive
   }
@@ -135,7 +153,10 @@ async function saveEntity() {
         class="cursor-pointer hover:shadow-md transition-shadow"
         @click="openEditModal(entity)"
       >
-        <div class="flex items-start justify-between">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <UIcon :name="entity.icon || 'i-lucide-alert-circle'" class="w-5 h-5 text-primary" />
+          </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
               <h3 class="font-medium text-gray-900 dark:text-white truncate">
@@ -202,6 +223,21 @@ async function saveEntity() {
                 v-model="form.name"
                 placeholder="e.g., Water & Sewage"
               />
+            </UFormField>
+
+            <UFormField label="Icon">
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="opt in iconOptions"
+                  :key="opt.value"
+                  type="button"
+                  class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
+                  :class="form.icon === opt.value ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'"
+                  @click="form.icon = opt.value"
+                >
+                  <UIcon :name="opt.icon" class="w-5 h-5" />
+                </button>
+              </div>
             </UFormField>
 
             <UFormField label="Description">

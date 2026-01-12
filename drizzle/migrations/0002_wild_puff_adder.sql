@@ -1,0 +1,1 @@
+ALTER TABLE "entities" ADD COLUMN "icon" text DEFAULT 'i-lucide-alert-circle';

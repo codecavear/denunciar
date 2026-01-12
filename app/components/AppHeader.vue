@@ -4,18 +4,28 @@ const { loggedIn } = useUserSession()
 const route = useRoute()
 
 const items = computed(() => {
+  const baseItems = [{
+    label: 'Map',
+    to: '/map',
+    icon: 'i-lucide-map'
+  }]
+
   if (loggedIn.value) {
-    return [{
-      label: t('nav.dashboard'),
-      to: '/dashboard',
-      icon: 'i-lucide-layout-dashboard'
-    }, {
-      label: t('nav.newIssue'),
-      to: '/issues/new',
-      icon: 'i-lucide-plus-circle'
-    }]
+    return [
+      ...baseItems,
+      {
+        label: t('nav.dashboard'),
+        to: '/dashboard',
+        icon: 'i-lucide-layout-dashboard'
+      },
+      {
+        label: t('nav.newIssue'),
+        to: '/issues/new',
+        icon: 'i-lucide-plus-circle'
+      }
+    ]
   }
-  return []
+  return baseItems
 })
 
 const localeItems = computed(() => {
