@@ -21,7 +21,7 @@ const issueModal = overlay.create(LazyIssueCreateModal)
 
 const mapContainer = ref<HTMLDivElement>()
 const map = ref<google.maps.Map>()
-const markers = ref<google.maps.marker.AdvancedMarkerElement[]>([])
+const markers = ref<(google.maps.marker.AdvancedMarkerElement | google.maps.Marker)[]>([])
 const isMapLoaded = ref(false)
 
 const selectedIssue = ref<PublicIssue | null>(null)
@@ -93,16 +93,20 @@ async function loadGoogleMaps() {
 function initMap() {
   if (!mapContainer.value) return
 
-  const mapId = 'denunciar-map'
-
-  map.value = new google.maps.Map(mapContainer.value, {
+  const mapOptions: google.maps.MapOptions = {
     center: defaultCenter,
     zoom: 14,
     mapTypeControl: false,
     streetViewControl: false,
-    fullscreenControl: false,
-    mapId
-  })
+    fullscreenControl: false
+  }
+
+  // Only set mapId if configured (required for AdvancedMarkerElement)
+  if (config.public.googleMapsMapId) {
+    mapOptions.mapId = config.public.googleMapsMapId as string
+  }
+
+  map.value = new google.maps.Map(mapContainer.value, mapOptions)
 
   // Click on map to create issue at location
   map.value.addListener('click', async (e: google.maps.MapMouseEvent) => {
@@ -187,25 +191,54 @@ function addMarkers() {
   if (!map.value || !issues.value) return
 
   // Clear existing markers
-  markers.value.forEach(m => m.map = null)
+  markers.value.forEach((m: any) => {
+    if (m.map !== undefined) m.map = null
+    else if (m.setMap) m.setMap(null)
+  })
   markers.value = []
+
+  const useAdvancedMarkers = !!config.public.googleMapsMapId && !!google.maps.marker?.AdvancedMarkerElement
 
   issues.value.forEach((issue) => {
     if (!issue.latitude || !issue.longitude) return
 
-    const marker = new google.maps.marker.AdvancedMarkerElement({
-      position: {
-        lat: Number(issue.latitude),
-        lng: Number(issue.longitude)
-      },
-      map: map.value,
-      content: createMarkerContent(issue),
-      title: issue.title
-    })
+    const position = {
+      lat: Number(issue.latitude),
+      lng: Number(issue.longitude)
+    }
 
-    marker.addListener('click', () => {
-      selectedIssue.value = issue
-    })
+    let marker: any
+
+    if (useAdvancedMarkers) {
+      marker = new google.maps.marker.AdvancedMarkerElement({
+        position,
+        map: map.value,
+        content: createMarkerContent(issue),
+        title: issue.title
+      })
+      marker.addListener('click', () => {
+        selectedIssue.value = issue
+      })
+    } else {
+      // Fallback to regular markers
+      const color = statusColors[issue.status]
+      marker = new google.maps.Marker({
+        position,
+        map: map.value,
+        title: issue.title,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: color,
+          fillOpacity: 1,
+          strokeColor: 'white',
+          strokeWeight: 2
+        }
+      })
+      marker.addListener('click', () => {
+        selectedIssue.value = issue
+      })
+    }
 
     markers.value.push(marker)
   })
