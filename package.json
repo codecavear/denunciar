@@ -22,7 +22,7 @@
     "@iconify-json/simple-icons": "^1.2.63",
     "@nuxt/image": "^2.0.0",
     "@nuxt/ui": "^4.3.0",
-    "@nuxtjs/i18n": "^10.2.1",
+    "@nuxtjs/i18n": "^10.2.1", 
     "@standard-schema/spec": "^1.1.0",
     "@vueuse/nuxt": "^14.1.0",
     "cloudinary": "^2.8.0",

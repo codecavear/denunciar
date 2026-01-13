@@ -71,6 +71,12 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    serverAssets: [
+      {
+        baseName: 'migrations',
+        dir: 'drizzle/migrations'
+      }
+    ],
     prerender: {
       routes: [
         '/'
