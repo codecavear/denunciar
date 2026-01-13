@@ -358,8 +358,11 @@ async function openCreateModal() {
     <!-- Issue detail slideover -->
     <USlideover
       v-model:open="isSlideoverOpen"
+      :title="selectedIssue?.title"
       :ui="{ content: 'max-w-md' }"
     >
+      <span class="hidden" />
+
       <template #header>
         <div v-if="selectedIssue" class="flex items-start justify-between gap-2 w-full">
           <h2 class="text-lg font-semibold text-highlighted truncate">
