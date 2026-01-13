@@ -330,11 +330,11 @@ async function openCreateModal() {
     </div>
 
     <!-- Legend -->
-    <div class="absolute bottom-4 left-4 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-3 z-40">
-      <div class="text-xs font-medium text-gray-500 mb-2">{{ t('map.legend') }}</div>
-      <div class="space-y-1">
-        <div v-for="(color, status) in statusColors" :key="status" class="flex items-center gap-2 text-sm">
-          <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: color }" />
+    <div class="absolute bottom-4 left-4 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-2 md:p-3 z-40">
+      <div class="text-[10px] md:text-xs font-medium text-gray-500 mb-1 md:mb-2">{{ t('map.legend') }}</div>
+      <div class="space-y-0.5 md:space-y-1">
+        <div v-for="(color, status) in statusColors" :key="status" class="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-sm">
+          <div class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full" :style="{ backgroundColor: color }" />
           <span>{{ statusLabels[status] }}</span>
         </div>
       </div>
