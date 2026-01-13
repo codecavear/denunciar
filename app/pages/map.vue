@@ -66,6 +66,12 @@ function getIconPath(category: string): string {
   return getIconSvgPath(iconName)
 }
 
+function getCategoryIcon(category: string | null | undefined): string {
+  const cat = category || 'other'
+  const icon = categoryConfig[cat]?.icon || 'help-circle'
+  return `i-lucide-${icon}`
+}
+
 onMounted(async () => {
   if (!config.public.googleMapsApiKey) {
     console.warn('Google Maps API key not configured')
@@ -414,14 +420,9 @@ async function openCreateModal() {
             class="w-full h-48 object-cover"
           >
           <div v-else class="w-full h-32 bg-elevated flex items-center justify-center">
-            <UIcon
-<<<<<<< Updated upstream
-              :name="selectedIssue.entity?.icon || 'i-lucide-alert-circle'"
-              class="w-12 h-12 text-muted"
-=======
-              :name="'i-lucide-' + (categoryConfig[selectedIssue.category || 'other']?.icon || 'help-circle')"
+             <UIcon
+              :name="getCategoryIcon(selectedIssue.category)"
               class="w-12 h-12 text-gray-400"
->>>>>>> Stashed changes
             />
           </div>
 
@@ -458,15 +459,9 @@ async function openCreateModal() {
 
           <!-- Details -->
           <div class="space-y-2 text-sm">
-<<<<<<< Updated upstream
-            <div v-if="selectedIssue.entity" class="flex items-center gap-2 text-muted">
-              <UIcon :name="selectedIssue.entity.icon || 'i-lucide-building-2'" class="w-4 h-4" />
-              <span>{{ selectedIssue.entity.name }}</span>
-=======
             <div v-if="selectedIssue.category" class="flex items-center gap-2 text-gray-500">
               <UIcon :name="'i-lucide-' + (categoryConfig[selectedIssue.category || 'other']?.icon || 'help-circle')" class="w-4 h-4" />
               <span class="capitalize">{{ categoryConfig[selectedIssue.category || 'other']?.label || selectedIssue.category }}</span>
->>>>>>> Stashed changes
             </div>
             <div v-if="selectedIssue.address" class="flex items-center gap-2 text-muted">
               <UIcon name="i-lucide-map-pin" class="w-4 h-4" />
