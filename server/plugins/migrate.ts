@@ -1,5 +1,5 @@
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
-import { getDb } from '../../utils/db'
+import { getDb } from '../utils/db'
 
 export default defineNitroPlugin(async () => {
   if (process.env.NODE_ENV !== 'production') return
