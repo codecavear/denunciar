@@ -86,7 +86,14 @@ async function initMap() {
     mapTypeControl: false,
     streetViewControl: false,
     fullscreenControl: false,
-    clickableIcons: false
+    clickableIcons: false,
+    styles: [
+      {
+        featureType: 'poi',
+        elementType: 'labels',
+        stylers: [{ visibility: 'off' }]
+      }
+    ]
   }
 
   // Only pass mapId if it exists to avoid "Map ID not found" warnings from Google
@@ -112,8 +119,9 @@ async function initMap() {
   }
 }
 
-// Category Filter
+// Category Filter & View Options
 const activeCategories = ref<Set<string>>(new Set(Object.keys(categoryColors)))
+const showPois = ref(false) // Default off
 
 function toggleCategory(category: string) {
   if (activeCategories.value.has(category)) {
@@ -123,6 +131,26 @@ function toggleCategory(category: string) {
   }
   activeCategories.value = new Set(activeCategories.value)
 }
+
+function togglePois() {
+  showPois.value = !showPois.value
+}
+
+// Watchers
+watch(showPois, (visible) => {
+  if (!map.value) return
+  
+  // Note: If Map ID is used (Advanced Markers), Google Cloud formatting overrides this JSON style.
+  // This JSON style only works for standard maps or if Cloud style doesn't enforce POI visibility.
+  const styles = [
+    {
+      featureType: 'poi',
+      elementType: 'labels',
+      stylers: [{ visibility: visible ? 'on' : 'off' }]
+    }
+  ]
+  map.value.setOptions({ styles })
+})
 
 function centerMap() {
   if (!map.value || !navigator.geolocation) return
@@ -342,6 +370,22 @@ async function openCreateModal() {
     <!-- Category Filters (Interactive) - ClientOnly to prevent i18n hydration mismatch -->
     <ClientOnly>
       <div class="absolute top-20 left-4 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-3 z-40 max-w-[160px]">
+        
+        <!-- View Options -->
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Vista</div>
+        <button
+          class="flex items-center gap-2 text-xs w-full hover:bg-gray-50 dark:hover:bg-gray-800 rounded px-1.5 py-1 transition-all duration-200 mb-2"
+          :class="showPois ? 'bg-gray-50 dark:bg-gray-800 font-medium' : 'opacity-70'"
+          @click="togglePois()"
+        >
+           <UIcon name="i-lucide-map-pin" class="w-4 h-4 text-gray-500" />
+           <span>Lugares</span>
+           <UIcon v-if="showPois" name="i-lucide-eye" class="w-3 h-3 ml-auto text-primary" />
+           <UIcon v-else name="i-lucide-eye-off" class="w-3 h-3 ml-auto text-gray-400" />
+        </button>
+
+        <div class="h-px bg-gray-100 dark:bg-gray-800 my-2" />
+
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t('map.filterByType') }}</div>
         <div class="space-y-1">
           <button
@@ -363,9 +407,18 @@ async function openCreateModal() {
     <div class="absolute bottom-4 left-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur rounded-lg shadow-lg p-3 z-40 border border-gray-100 dark:border-gray-800">
       <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t('map.status') }}</div>
       <div class="flex flex-col gap-1.5">
-        <div v-for="(color, status) in statusColors" :key="status" class="flex items-center gap-2 text-xs">
-          <div class="w-2.5 h-2.5 rounded-full ring-2 ring-white dark:ring-gray-900 shadow-sm" :style="{ backgroundColor: color }" />
-          <span class="text-gray-600 dark:text-gray-300">{{ statusLabels[status] }}</span>
+        <!-- Simplified Legend: Pending, Resolved, Closed -->
+        <div class="flex items-center gap-2 text-xs">
+          <div class="w-2.5 h-2.5 rounded-full ring-2 ring-white dark:ring-gray-900 shadow-sm" :style="{ backgroundColor: statusColors.pending }" />
+          <span class="text-gray-600 dark:text-gray-300">Pendiente</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <div class="w-2.5 h-2.5 rounded-full ring-2 ring-white dark:ring-gray-900 shadow-sm" :style="{ backgroundColor: statusColors.resolved }" />
+          <span class="text-gray-600 dark:text-gray-300">Resuelto</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <div class="w-2.5 h-2.5 rounded-full ring-2 ring-white dark:ring-gray-900 shadow-sm" :style="{ backgroundColor: statusColors.closed }" />
+          <span class="text-gray-600 dark:text-gray-300">Cerrado</span>
         </div>
       </div>
     </div>
