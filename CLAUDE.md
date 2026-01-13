@@ -1,6 +1,17 @@
-# Nuxt FS Template
+# Denunciar
 
-Full-stack Nuxt application template with Google OAuth, PostgreSQL database, and i18n support. Based on the Nuxt UI Pro SaaS template.
+Full-stack Nuxt application with Google OAuth, PostgreSQL database, and i18n support. Based on the Nuxt UI Pro SaaS template.
+
+## AI Assistant Guidelines
+
+### MCP Tools
+Use the Nuxt UI MCP tools for accurate component documentation:
+- `mcp__nuxt-ui-remote__get-component` - Get docs for a component
+- `mcp__nuxt-ui-remote__get-component-metadata` - Get props, slots, events
+- `mcp__nuxt-ui-remote__list-components` - Browse all components
+
+### Agents
+- `.claude/agents/frontend.md` - UI development with Nuxt UI 4
 
 ## Tech Stack
 
@@ -10,6 +21,38 @@ Full-stack Nuxt application template with Google OAuth, PostgreSQL database, and
 - **Nuxt Content** - File-based CMS for docs/blog
 - **VueUse** - Vue composition utilities
 - **TypeScript**
+
+### Nuxt UI 4 Quick Reference
+
+**Icons:** `i-lucide-{name}` (e.g., `i-lucide-search`, `i-lucide-plus`)
+
+**Colors:** `primary`, `secondary`, `success`, `warning`, `error`, `info`
+
+**Variants:** `solid`, `outline`, `soft`, `subtle`, `ghost`, `link`
+
+**Sizes:** `xs`, `sm`, `md`, `lg`, `xl`
+
+**Common Components:**
+- Layout: `UApp`, `UContainer`, `UMain`, `UHeader`, `UFooter`
+- Forms: `UForm`, `UFormField`, `UInput`, `USelect`, `UButton`
+- Data: `UTable`, `UCard`, `UBadge`, `UAvatar`
+- Overlays: `UModal`, `UDrawer`, `UToast`, `UDropdownMenu`
+- Dashboard: `UDashboardSidebar`, `UDashboardPanel`, `UDashboardNavbar`
+
+**Form Validation:**
+```vue
+<UForm :schema="zodSchema" :state="state" @submit="onSubmit">
+  <UFormField label="Email" name="email">
+    <UInput v-model="state.email" />
+  </UFormField>
+</UForm>
+```
+
+**Toasts:**
+```ts
+const toast = useToast()
+toast.add({ title: 'Done', color: 'success' })
+```
 
 ### Backend
 - **Nitro Server** - Nuxt's built-in server
