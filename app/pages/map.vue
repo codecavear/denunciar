@@ -108,17 +108,6 @@ function initMap() {
 
   map.value = new google.maps.Map(mapContainer.value, mapOptions)
 
-  // Click on map to create issue at location
-  map.value.addListener('click', async (e: google.maps.MapMouseEvent) => {
-    if (e.latLng && loggedIn.value) {
-      const location = { lat: e.latLng.lat(), lng: e.latLng.lng() }
-      const result = await issueModal.open({ initialLocation: location }).result
-      if (result) {
-        await onIssueCreated()
-      }
-    }
-  })
-
   isMapLoaded.value = true
   addMarkers()
 
@@ -348,9 +337,6 @@ async function openCreateModal() {
           <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: color }" />
           <span>{{ statusLabels[status] }}</span>
         </div>
-      </div>
-      <div class="text-xs text-gray-400 mt-3">
-        {{ t('map.clickToReport') }}
       </div>
     </div>
 
