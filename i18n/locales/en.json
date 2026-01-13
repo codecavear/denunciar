@@ -56,7 +56,9 @@
     "reportCreated": "Report created successfully",
     "reportFailed": "Failed to create report",
     "fillRequired": "Please fill in title and description",
-    "confirmFailed": "Failed to confirm issue"
+    "confirmFailed": "Failed to confirm issue",
+    "issueDeleted": "Issue deleted",
+    "deleteFailed": "Failed to delete issue"
   },
   "entities": {
     "title": "Government Departments",
@@ -86,7 +88,7 @@
     "titleHighlight": "Community",
     "description": "Easily report problems in your neighborhood - potholes, broken streetlights, water leaks, and more. Our AI automatically routes your report to the right government department.",
     "seo": {
-      "title": "Denunciar - Community Issue Reporting",
+      "title": "Denunciar",
       "description": "Report problems in your community and get them resolved. AI-powered routing to government departments."
     },
     "hero": {

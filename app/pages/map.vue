@@ -294,6 +294,18 @@ async function markResolved(issue: PublicIssue) {
   }
 }
 
+async function deleteIssue(issue: PublicIssue) {
+  try {
+    await $fetch(`/api/issues/${issue.id}`, { method: 'DELETE' })
+    await refreshIssues()
+    addMarkers()
+    selectedIssue.value = null
+    toast.add({ title: t('issue.issueDeleted'), color: 'success' })
+  } catch (e) {
+    toast.add({ title: t('issue.deleteFailed'), color: 'error' })
+  }
+}
+
 function closePanel() {
   selectedIssue.value = null
 }
@@ -386,8 +398,8 @@ async function openCreateModal() {
             color="neutral"
             variant="solid"
             size="sm"
-            class="absolute top-3 right-3"
-            @click="closePanel"
+            class="absolute top-3 right-3 z-10"
+            @click.stop="closePanel"
           />
         </div>
 
@@ -459,12 +471,11 @@ async function openCreateModal() {
 
             <UButton
               v-if="isOwner(selectedIssue)"
-              color="neutral"
+              color="error"
               variant="outline"
-              :to="`/issues/${selectedIssue.id}`"
-            >
-              {{ t('common.edit') }}
-            </UButton>
+              icon="i-lucide-trash-2"
+              @click="deleteIssue(selectedIssue)"
+            />
           </div>
         </div>
       </div>

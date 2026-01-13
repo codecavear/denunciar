@@ -56,7 +56,9 @@
     "reportCreated": "Reporte creado exitosamente",
     "reportFailed": "Error al crear el reporte",
     "fillRequired": "Por favor completa el titulo y la descripcion",
-    "confirmFailed": "Error al confirmar el problema"
+    "confirmFailed": "Error al confirmar el problema",
+    "issueDeleted": "Problema eliminado",
+    "deleteFailed": "Error al eliminar el problema"
   },
   "entities": {
     "title": "Departamentos Gubernamentales",
@@ -86,7 +88,7 @@
     "titleHighlight": "Comunidad",
     "description": "Reporta facilmente problemas en tu vecindario - baches, luces rotas, fugas de agua y mas. Nuestra IA envia automaticamente tu reporte al departamento correcto.",
     "seo": {
-      "title": "Denunciar - Reportes de Problemas Comunitarios",
+      "title": "Denunciar",
       "description": "Reporta problemas en tu comunidad y obten soluciones. Enrutamiento automatico con IA a departamentos gubernamentales."
     },
     "hero": {
