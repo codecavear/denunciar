@@ -344,23 +344,25 @@ async function openCreateModal() {
       </div>
     </ClientOnly>
 
-    <!-- Category Filters (Interactive) -->
-    <div class="absolute top-20 left-4 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-3 z-40 max-w-[160px]">
-      <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t('map.filterByType') }}</div>
-      <div class="space-y-1">
-        <button
-          v-for="(config, key) in categoryConfig"
-          :key="key"
-          class="flex items-center gap-2 text-xs w-full hover:bg-gray-50 dark:hover:bg-gray-800 rounded px-1.5 py-1 transition-all duration-200"
-          :class="activeCategories.has(key) ? 'bg-gray-50 dark:bg-gray-800 font-medium' : 'opacity-50 grayscale'"
-          @click="toggleCategory(key)"
-        >
-           <UIcon :name="'i-lucide-' + config.icon" class="w-4 h-4" :style="{ color: activeCategories.has(key) ? categoryColors[key] : 'currentColor' }" />
-           <span>{{ config.label }}</span>
-           <UIcon v-if="activeCategories.has(key)" name="i-lucide-check" class="w-3 h-3 ml-auto text-primary" />
-        </button>
+    <!-- Category Filters (Interactive) - ClientOnly to prevent i18n hydration mismatch -->
+    <ClientOnly>
+      <div class="absolute top-20 left-4 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-3 z-40 max-w-[160px]">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t('map.filterByType') }}</div>
+        <div class="space-y-1">
+          <button
+            v-for="(config, key) in categoryConfig"
+            :key="key"
+            class="flex items-center gap-2 text-xs w-full hover:bg-gray-50 dark:hover:bg-gray-800 rounded px-1.5 py-1 transition-all duration-200"
+            :class="activeCategories.has(key) ? 'bg-gray-50 dark:bg-gray-800 font-medium' : 'opacity-50 grayscale'"
+            @click="toggleCategory(key)"
+          >
+             <UIcon :name="'i-lucide-' + config.icon" class="w-4 h-4" :style="{ color: activeCategories.has(key) ? categoryColors[key] : 'currentColor' }" />
+             <span>{{ config.label }}</span>
+             <UIcon v-if="activeCategories.has(key)" name="i-lucide-check" class="w-3 h-3 ml-auto text-primary" />
+          </button>
+        </div>
       </div>
-    </div>
+    </ClientOnly>
 
     <!-- Status Legend (Static/Informational) -->
     <div class="absolute bottom-4 left-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur rounded-lg shadow-lg p-3 z-40 border border-gray-100 dark:border-gray-800">
