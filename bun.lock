@@ -13,6 +13,7 @@
         "@standard-schema/spec": "^1.1.0",
         "@vueuse/nuxt": "^14.1.0",
         "cloudinary": "^2.8.0",
+        "drizzle-kit": "^0.31.8",
         "drizzle-orm": "^0.45.1",
         "nuxt": "^4.2.2",
         "nuxt-auth-utils": "^0.5.26",
@@ -24,7 +25,6 @@
       "devDependencies": {
         "@nuxt/eslint": "^1.12.1",
         "@types/google.maps": "^3.58.1",
-        "drizzle-kit": "^0.31.8",
         "eslint": "^9.39.2",
         "typescript": "^5.9.3",
         "vue-tsc": "^3.2.1",

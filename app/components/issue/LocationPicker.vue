@@ -22,6 +22,8 @@ const isMapLoaded = ref(false)
 
 const defaultCenter = { lat: 40.4168, lng: -3.7038 }
 
+const { load: loadGoogleMaps } = useGoogleMaps()
+
 onMounted(async () => {
   if (!config.public.googleMapsApiKey) {
     console.warn('Google Maps API key not configured')
@@ -29,42 +31,32 @@ onMounted(async () => {
   }
 
   await loadGoogleMaps()
-  initMap()
+  await initMap()
 })
 
-async function loadGoogleMaps() {
-  if (window.google?.maps) {
-    return
-  }
-
-  return new Promise<void>((resolve, reject) => {
-    const script = document.createElement('script')
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${config.public.googleMapsApiKey}&libraries=places`
-    script.async = true
-    script.onload = () => resolve()
-    script.onerror = () => reject(new Error('Failed to load Google Maps'))
-    document.head.appendChild(script)
-  })
-}
-
-function initMap() {
+async function initMap() {
   if (!mapContainer.value) return
+
+  const { Map } = await google.maps.importLibrary("maps") as google.maps.MapsLibrary
+  const { Marker } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary
+  const { Geocoder } = await google.maps.importLibrary("geocoding") as google.maps.GeocodingLibrary
 
   const center = props.latitude && props.longitude
     ? { lat: props.latitude, lng: props.longitude }
     : defaultCenter
 
-  map.value = new google.maps.Map(mapContainer.value, {
+  map.value = new Map(mapContainer.value, {
     center,
     zoom: 15,
+    mapId: config.public.googleMapsMapId as string,
     mapTypeControl: false,
     streetViewControl: false,
     fullscreenControl: false
   })
 
-  geocoder.value = new google.maps.Geocoder()
+  geocoder.value = new Geocoder()
 
-  marker.value = new google.maps.Marker({
+  marker.value = new Marker({
     map: map.value,
     draggable: true,
     position: props.latitude && props.longitude ? center : undefined,
@@ -134,20 +126,47 @@ function getCurrentLocation() {
 
   isLoadingLocation.value = true
 
+  const successCallback = (position: GeolocationPosition) => {
+    const lat = position.coords.latitude
+    const lng = position.coords.longitude
+    map.value?.setCenter({ lat, lng })
+    setLocation(lat, lng)
+    isLoadingLocation.value = false
+  }
+
+  const errorCallback = (error: GeolocationPositionError) => {
+    // macOS/Browser environment often throws Code 2 (Position Unavailable) when WiFi location is fluctuating or disabled.
+    // We suppress the alert for Code 2 to avoid user annoyance, as the map is still usable manually.
+    if (error.code === error.POSITION_UNAVAILABLE) {
+      console.warn('Geolocation unavailable (Code 2). Using manual location selection.', error.message)
+      isLoadingLocation.value = false
+      return
+    }
+
+    console.error('Geolocation error (High Accuracy):', error)
+    
+    if (error.code === error.TIMEOUT) {
+      console.log('Timeout. Retrying with low accuracy...')
+      navigator.geolocation.getCurrentPosition(
+        successCallback,
+        (fallbackError) => {
+          console.warn('Geolocation fallback failed:', fallbackError)
+          // Silent failure on fallback to prevent spam, just stop loading
+          isLoadingLocation.value = false
+        },
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
+      )
+    } else {
+      // Permission denied (Code 1) or other errors -> Show alert
+      alert(`Unable to get location: ${error.message}. Please select location manually on the map.`)
+      isLoadingLocation.value = false
+    }
+  }
+
   navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const lat = position.coords.latitude
-      const lng = position.coords.longitude
-      map.value?.setCenter({ lat, lng })
-      setLocation(lat, lng)
-      isLoadingLocation.value = false
-    },
-    (error) => {
-      console.error('Geolocation error:', error)
-      alert('Unable to get your location')
-      isLoadingLocation.value = false
-    },
-    { enableHighAccuracy: true }
+    successCallback,
+    errorCallback,
+    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
   )
 }
 
@@ -182,13 +201,13 @@ watch(() => props.address, (newAddress) => {
       />
     </div>
 
-    <div
-      ref="mapContainer"
-      class="w-full h-64 rounded-lg bg-gray-100 dark:bg-gray-800"
-    >
-      <div v-if="!isMapLoaded" class="flex items-center justify-center h-full">
-        <UIcon name="i-lucide-loader-2" class="w-8 h-8 animate-spin text-gray-400" />
-      </div>
+    <div class="relative w-full h-64 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden">
+      <ClientOnly>
+        <div ref="mapContainer" class="w-full h-full" />
+        <div v-if="!isMapLoaded" class="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 z-10">
+          <UIcon name="i-lucide-loader-2" class="w-8 h-8 animate-spin text-gray-400" />
+        </div>
+      </ClientOnly>
     </div>
 
     <p v-if="latitude && longitude" class="text-xs text-gray-500">

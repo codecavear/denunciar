@@ -72,6 +72,8 @@ function getCategoryIcon(category: string | null | undefined): string {
   return `i-lucide-${icon}`
 }
 
+const { load: loadGoogleMaps } = useGoogleMaps()
+
 onMounted(async () => {
   if (!config.public.googleMapsApiKey) {
     console.warn('Google Maps API key not configured')
@@ -79,24 +81,14 @@ onMounted(async () => {
   }
 
   await loadGoogleMaps()
-  initMap()
+  await initMap()
 })
 
-async function loadGoogleMaps() {
-  if (window.google?.maps?.marker) return
-
-  return new Promise<void>((resolve, reject) => {
-    const script = document.createElement('script')
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${config.public.googleMapsApiKey}&libraries=places,marker`
-    script.async = true
-    script.onload = () => resolve()
-    script.onerror = () => reject(new Error('Failed to load Google Maps'))
-    document.head.appendChild(script)
-  })
-}
-
-function initMap() {
+async function initMap() {
   if (!mapContainer.value) return
+
+  const { Map } = await google.maps.importLibrary("maps") as google.maps.MapsLibrary
+  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary
 
   const mapOptions: google.maps.MapOptions = {
     center: defaultCenter,
@@ -108,7 +100,7 @@ function initMap() {
     clickableIcons: false
   }
 
-  map.value = new google.maps.Map(mapContainer.value, mapOptions)
+  map.value = new Map(mapContainer.value, mapOptions)
 
   isMapLoaded.value = true
   addMarkers()
@@ -353,12 +345,15 @@ async function openCreateModal() {
 
 <template>
   <div class="relative w-full h-full">
-    <!-- Map container -->
-    <div ref="mapContainer" class="w-full h-full">
-      <div v-if="!isMapLoaded" class="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-900">
+    <ClientOnly>
+      <!-- Map container -->
+      <div ref="mapContainer" class="w-full h-full" />
+
+      <!-- Map Loading Overlay -->
+      <div v-if="!isMapLoaded" class="absolute inset-0 z-10 flex items-center justify-center bg-gray-100 dark:bg-gray-900">
         <UIcon name="i-lucide-loader-2" class="w-8 h-8 animate-spin text-primary" />
       </div>
-    </div>
+    </ClientOnly>
 
     <!-- Legend (Using Categories now) -->
     <div class="absolute bottom-4 left-4 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-2 md:p-3 z-40 max-h-[300px] overflow-y-auto">
@@ -462,7 +457,7 @@ async function openCreateModal() {
           <!-- Details -->
           <div class="space-y-2 text-sm">
             <div v-if="selectedIssue.category" class="flex items-center gap-2 text-gray-500">
-              <UIcon :name="'i-lucide-' + (categoryConfig[selectedIssue.category || 'other']?.icon || 'help-circle')" class="w-4 h-4" />
+              <UIcon :name="getCategoryIcon(selectedIssue.category)" class="w-4 h-4" />
               <span class="capitalize">{{ categoryConfig[selectedIssue.category || 'other']?.label || selectedIssue.category }}</span>
             </div>
             <div v-if="selectedIssue.address" class="flex items-center gap-2 text-muted">

@@ -5,14 +5,14 @@ import { issues } from '../../database/schema'
 const createIssueSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().min(1).max(2000),
-  imageUrl: z.string().url().optional(),
-  imagePublicId: z.string().optional(),
-  latitude: z.number().min(-90).max(90).optional(),
-  longitude: z.number().min(-180).max(180).optional(),
-  address: z.string().optional(),
-  entityId: z.string().uuid().optional(),
+  imageUrl: z.string().url().nullable().optional(),
+  imagePublicId: z.string().nullable().optional(),
+  latitude: z.number().min(-90).max(90).nullable().optional(),
+  longitude: z.number().min(-180).max(180).nullable().optional(),
+  address: z.string().nullable().optional(),
+  entityId: z.string().uuid().nullable().optional(),
   category: z.enum(['pothole', 'trash', 'lighting', 'safety', 'water', 'infrastructure', 'other']).default('other'),
-  aiConfidence: z.number().min(0).max(1).optional()
+  aiConfidence: z.number().min(0).max(1).nullable().optional()
 })
 
 export default defineEventHandler(async (event) => {
