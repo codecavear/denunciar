@@ -45,14 +45,19 @@ async function initMap() {
     ? { lat: props.latitude, lng: props.longitude }
     : defaultCenter
 
-  map.value = new Map(mapContainer.value, {
+  const mapOptions: google.maps.MapOptions = {
     center,
     zoom: 15,
-    mapId: config.public.googleMapsMapId as string,
     mapTypeControl: false,
     streetViewControl: false,
     fullscreenControl: false
-  })
+  }
+
+  if (config.public.googleMapsMapId) {
+    mapOptions.mapId = config.public.googleMapsMapId as string
+  }
+
+  map.value = new Map(mapContainer.value, mapOptions)
 
   geocoder.value = new Geocoder()
 

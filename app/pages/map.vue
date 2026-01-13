@@ -93,11 +93,15 @@ async function initMap() {
   const mapOptions: google.maps.MapOptions = {
     center: defaultCenter,
     zoom: 14,
-    mapId: config.public.googleMapsMapId as string, // Required for AdvancedMarker
     mapTypeControl: false,
     streetViewControl: false,
     fullscreenControl: false,
     clickableIcons: false
+  }
+
+  // Only pass mapId if it exists to avoid "Map ID not found" warnings from Google
+  if (config.public.googleMapsMapId) {
+    mapOptions.mapId = config.public.googleMapsMapId as string
   }
 
   map.value = new Map(mapContainer.value, mapOptions)
@@ -196,7 +200,7 @@ function toggleCategory(category: string) {
   addMarkers()
 }
 
-function addMarkers() {
+  function addMarkers() {
   if (!map.value || !issues.value) return
 
   // Clear existing markers
@@ -205,8 +209,14 @@ function addMarkers() {
   })
   markers.value = []
 
-  // Check support for AdvancedMarkerElement
-  const useAdvancedMarkers = !!google.maps.marker?.AdvancedMarkerElement
+  // Check support for AdvancedMarkerElement AND valid Map ID
+  // Advanced Markers require a valid mapId to be rendered.
+  const hasMapId = !!config.public.googleMapsMapId
+  const useAdvancedMarkers = !!google.maps.marker?.AdvancedMarkerElement && hasMapId
+
+  if (!hasMapId) {
+    console.warn('Google Maps "mapId" is missing. Advanced Markers (custom HTML icons) will be disabled. Using legacy markers fallback.')
+  }
 
   issues.value.forEach((issue) => {
     if (!issue.latitude || !issue.longitude) return
@@ -232,8 +242,10 @@ function addMarkers() {
       })
       markers.value.push(marker)
     } else {
-      // Fallback for no Advanced Markers support
-      const color = statusColors[issue.status]
+      // Robust Fallback: Standard Google Maps Marker
+      // We can't render the complex HTML balloon, but we CAN render a colored circle/pin
+      const color = statusColors[issue.status] || '#f59e0b'
+
       const marker = new google.maps.Marker({
         position,
         map: map.value,
