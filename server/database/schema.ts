@@ -3,6 +3,8 @@ import { relations } from 'drizzle-orm'
 
 // Enums
 export const issueStatusEnum = pgEnum('issue_status', ['pending', 'in_progress', 'resolved', 'closed'])
+export const issueCategoryEnum = pgEnum('issue_category', ['pothole', 'trash', 'lighting', 'safety', 'water', 'infrastructure', 'other'])
+export const moderationStatusEnum = pgEnum('moderation_status', ['pending', 'approved', 'rejected'])
 
 // Users table
 export const users = pgTable('users', {
@@ -39,6 +41,8 @@ export const issues = pgTable('issues', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').references(() => users.id).notNull(),
   entityId: uuid('entity_id').references(() => entities.id),
+  category: issueCategoryEnum('category').default('other').notNull(),
+  moderationStatus: moderationStatusEnum('moderation_status').default('approved').notNull(),
   title: text('title').notNull(),
   description: text('description').notNull(),
   imageUrl: text('image_url'),

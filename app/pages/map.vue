@@ -33,10 +33,10 @@ const { data: myConfirmations, refresh: refreshConfirmations } = await useFetch<
 const defaultCenter = { lat: -31.4201, lng: -64.1888 } // Cordoba, Argentina
 
 const statusColors: Record<string, string> = {
-  pending: '#f59e0b',
-  in_progress: '#3b82f6',
-  resolved: '#22c55e',
-  closed: '#6b7280'
+  pending: '#f59e0b', // Orange (Warning)
+  in_progress: '#3b82f6', // Blue (Info)
+  resolved: '#22c55e', // Green (Success)
+  closed: '#9ca3af' // Gray (Neutral)
 }
 
 const statusLabels = computed(() => ({
@@ -46,25 +46,24 @@ const statusLabels = computed(() => ({
   closed: t('status.closed')
 }))
 
-// Entity icon mapping (fallback for entities without custom icon)
-const entityIcons: Record<string, string> = {
-  'Water & Sewage': 'droplets',
-  'Roads & Infrastructure': 'road',
-  'Public Lighting': 'lightbulb',
-  'Waste Management': 'trash-2',
-  'Parks & Recreation': 'trees',
-  'Public Safety': 'shield-alert',
-  'Building & Permits': 'building'
+// Definition of Category Configuration (Icon + Color override/fallback)
+// Using Waze-style intuitive icons
+// IMPORTANT: These paths must perfectly match the ones in CategorySelector or be imported from a shared source. 
+// For now duplicating for simplicity in this MVP.
+const categoryConfig: Record<string, { icon: string, label: string }> = {
+  pothole: { icon: 'alert-triangle', label: 'Pothole' },
+  trash: { icon: 'trash-2', label: 'Trash' },
+  lighting: { icon: 'lightbulb', label: 'Lighting' },
+  safety: { icon: 'shield-alert', label: 'Safety' },
+  water: { icon: 'droplets', label: 'Water Leak' },
+  infrastructure: { icon: 'construction', label: 'Infrastructure' },
+  other: { icon: 'help-circle', label: 'Other' }
 }
 
-function getIconName(entity: Entity | null): string {
-  if (entity?.icon) {
-    return entity.icon.replace('i-lucide-', '')
-  }
-  if (entity?.name && entityIcons[entity.name]) {
-    return entityIcons[entity.name]
-  }
-  return 'alert-circle'
+function getIconPath(category: string): string {
+  const iconName = categoryConfig[category]?.icon || 'help-circle'
+  // Return SVG path data for each icon
+  return getIconSvgPath(iconName)
 }
 
 onMounted(async () => {
@@ -96,14 +95,11 @@ function initMap() {
   const mapOptions: google.maps.MapOptions = {
     center: defaultCenter,
     zoom: 14,
+    mapId: config.public.googleMapsMapId as string, // Required for AdvancedMarker
     mapTypeControl: false,
     streetViewControl: false,
-    fullscreenControl: false
-  }
-
-  // Only set mapId if configured (required for AdvancedMarkerElement)
-  if (config.public.googleMapsMapId) {
-    mapOptions.mapId = config.public.googleMapsMapId as string
+    fullscreenControl: false,
+    clickableIcons: false
   }
 
   map.value = new google.maps.Map(mapContainer.value, mapOptions)
@@ -111,7 +107,6 @@ function initMap() {
   isMapLoaded.value = true
   addMarkers()
 
-  // Try to get user's location
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -126,39 +121,49 @@ function initMap() {
 }
 
 function createMarkerContent(issue: PublicIssue): HTMLElement {
-  const color = statusColors[issue.status]
-  const iconName = getIconName(issue.entity)
+  const statusColor = statusColors[issue.status] || statusColors.pending
+  const category = issue.category || 'other'
+  const iconPath = getIconPath(category)
 
   const container = document.createElement('div')
   container.className = 'marker-container'
+  // Waze-style: Round balloon with icon inside. Border color indicates status.
   container.innerHTML = `
     <div style="
-      width: 40px;
-      height: 40px;
-      background: ${color};
-      border: 3px solid white;
-      border-radius: 50% 50% 50% 0;
+      position: relative;
+      width: 44px;
+      height: 44px;
+      background: white;
+      border: 4px solid ${statusColor};
+      border-radius: 50% 50% 50% 10%;
       transform: rotate(-45deg);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
       cursor: pointer;
+      transition: transform 0.2s;
     ">
-      <svg style="
-        width: 18px;
-        height: 18px;
-        transform: rotate(45deg);
-        fill: none;
-        stroke: white;
-        stroke-width: 2;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-      " viewBox="0 0 24 24">
-        ${getIconSvgPath(iconName)}
-      </svg>
+      <div style="transform: rotate(45deg); display: flex; align-items: center; justify-content: center;">
+        <svg style="
+          width: 24px;
+          height: 24px;
+          fill: none;
+          stroke: #374151; /* Gray-700 */
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        " viewBox="0 0 24 24">
+          ${iconPath}
+        </svg>
+      </div>
     </div>
   `
+  
+  // Add hover effect via event listeners if needed, or simple CSS class (but style is inline here)
+  container.onmouseenter = () => { container.firstElementChild!.setAttribute('style', container.firstElementChild!.getAttribute('style') + ' transform: rotate(-45deg) scale(1.1);') }
+  container.onmouseleave = () => { container.firstElementChild!.setAttribute('style', container.firstElementChild!.getAttribute('style')!.replace(' scale(1.1)', '')) }
+
   return container
 }
 
@@ -171,9 +176,26 @@ function getIconSvgPath(iconName: string): string {
     'trees': '<path d="M10 10v.2A3 3 0 0 1 8.9 16v0H5v0h0a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0z"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M10.9 12.9a8 8 0 0 1 10.1 7.1h0a3 3 0 0 1-3 3h0H8"/>',
     'shield-alert': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
     'building': '<rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/>',
-    'alert-circle': '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>'
+    'alert-circle': '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
+    'alert-triangle': '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/>',
+    'construction': '<rect x="2" y="6" width="20" height="8" rx="1"/><path d="M17 14v7"/><path d="M7 14v7"/><path d="M17 3v3"/><path d="M7 3v3"/><path d="M10 14 2.3 6.3"/><path d="m14 6 7.7 7.7"/><path d="m8 6 8 8"/>',
+    'help-circle': '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>'
   }
   return paths[iconName] || paths['alert-circle']
+}
+
+// Category Filter
+const activeCategories = ref<Set<string>>(new Set(Object.keys(categoryConfig)))
+
+function toggleCategory(category: string) {
+  if (activeCategories.value.has(category)) {
+    activeCategories.value.delete(category)
+  } else {
+    activeCategories.value.add(category)
+  }
+  // Trigger reactivity for set
+  activeCategories.value = new Set(activeCategories.value)
+  addMarkers()
 }
 
 function addMarkers() {
@@ -182,24 +204,26 @@ function addMarkers() {
   // Clear existing markers
   markers.value.forEach((m: any) => {
     if (m.map !== undefined) m.map = null
-    else if (m.setMap) m.setMap(null)
   })
   markers.value = []
 
-  const useAdvancedMarkers = !!config.public.googleMapsMapId && !!google.maps.marker?.AdvancedMarkerElement
+  // Check support for AdvancedMarkerElement
+  const useAdvancedMarkers = !!google.maps.marker?.AdvancedMarkerElement
 
   issues.value.forEach((issue) => {
     if (!issue.latitude || !issue.longitude) return
+
+    const category = issue.category || 'other'
+    // Filter out issues if their category is unchecked
+    if (!activeCategories.value.has(category)) return
 
     const position = {
       lat: Number(issue.latitude),
       lng: Number(issue.longitude)
     }
 
-    let marker: any
-
     if (useAdvancedMarkers) {
-      marker = new google.maps.marker.AdvancedMarkerElement({
+      const marker = new google.maps.marker.AdvancedMarkerElement({
         position,
         map: map.value,
         content: createMarkerContent(issue),
@@ -208,10 +232,11 @@ function addMarkers() {
       marker.addListener('click', () => {
         selectedIssue.value = issue
       })
+      markers.value.push(marker)
     } else {
-      // Fallback to regular markers
+      // Fallback for no Advanced Markers support
       const color = statusColors[issue.status]
-      marker = new google.maps.Marker({
+      const marker = new google.maps.Marker({
         position,
         map: map.value,
         title: issue.title,
@@ -227,9 +252,8 @@ function addMarkers() {
       marker.addListener('click', () => {
         selectedIssue.value = issue
       })
+      markers.value.push(marker)
     }
-
-    markers.value.push(marker)
   })
 }
 
@@ -309,7 +333,6 @@ function formatDate(date: Date | string) {
 
 async function onIssueCreated() {
   await refreshIssues()
-  addMarkers()
 }
 
 async function openCreateModal() {
@@ -329,12 +352,30 @@ async function openCreateModal() {
       </div>
     </div>
 
-    <!-- Legend -->
-    <div class="absolute bottom-4 left-4 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-2 md:p-3 z-40">
+    <!-- Legend (Using Categories now) -->
+    <div class="absolute bottom-4 left-4 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-2 md:p-3 z-40 max-h-[300px] overflow-y-auto">
       <div class="text-[10px] md:text-xs font-medium text-gray-500 mb-1 md:mb-2">{{ t('map.legend') }}</div>
-      <div class="space-y-0.5 md:space-y-1">
+      
+      <!-- Category Filter -->
+      <div class="mb-3 space-y-1">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Filter by Type</div>
+        <button
+          v-for="(config, key) in categoryConfig"
+          :key="key"
+          class="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-sm w-full hover:bg-gray-50 dark:hover:bg-gray-800 rounded px-1 transition-colors"
+          :class="activeCategories.has(key) ? 'opacity-100' : 'opacity-40 grayscale'"
+          @click="toggleCategory(key)"
+        >
+           <UIcon :name="'i-lucide-' + config.icon" class="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-600 dark:text-gray-400" />
+           <span>{{ config.label }}</span>
+        </button>
+      </div>
+
+      <!-- Status Legend -->
+      <div class="space-y-1 pt-2 border-t border-gray-100 dark:border-gray-800">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Status</div>
         <div v-for="(color, status) in statusColors" :key="status" class="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-sm">
-          <div class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full" :style="{ backgroundColor: color }" />
+          <div class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border border-gray-300 dark:border-gray-600" :style="{ backgroundColor: color }" />
           <span>{{ statusLabels[status] }}</span>
         </div>
       </div>
@@ -374,8 +415,13 @@ async function openCreateModal() {
           >
           <div v-else class="w-full h-32 bg-elevated flex items-center justify-center">
             <UIcon
+<<<<<<< Updated upstream
               :name="selectedIssue.entity?.icon || 'i-lucide-alert-circle'"
               class="w-12 h-12 text-muted"
+=======
+              :name="'i-lucide-' + (categoryConfig[selectedIssue.category || 'other']?.icon || 'help-circle')"
+              class="w-12 h-12 text-gray-400"
+>>>>>>> Stashed changes
             />
           </div>
 
@@ -412,9 +458,15 @@ async function openCreateModal() {
 
           <!-- Details -->
           <div class="space-y-2 text-sm">
+<<<<<<< Updated upstream
             <div v-if="selectedIssue.entity" class="flex items-center gap-2 text-muted">
               <UIcon :name="selectedIssue.entity.icon || 'i-lucide-building-2'" class="w-4 h-4" />
               <span>{{ selectedIssue.entity.name }}</span>
+=======
+            <div v-if="selectedIssue.category" class="flex items-center gap-2 text-gray-500">
+              <UIcon :name="'i-lucide-' + (categoryConfig[selectedIssue.category || 'other']?.icon || 'help-circle')" class="w-4 h-4" />
+              <span class="capitalize">{{ categoryConfig[selectedIssue.category || 'other']?.label || selectedIssue.category }}</span>
+>>>>>>> Stashed changes
             </div>
             <div v-if="selectedIssue.address" class="flex items-center gap-2 text-muted">
               <UIcon name="i-lucide-map-pin" class="w-4 h-4" />

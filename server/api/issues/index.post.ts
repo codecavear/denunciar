@@ -11,6 +11,7 @@ const createIssueSchema = z.object({
   longitude: z.number().min(-180).max(180).optional(),
   address: z.string().optional(),
   entityId: z.string().uuid().optional(),
+  category: z.enum(['pothole', 'trash', 'lighting', 'safety', 'water', 'infrastructure', 'other']).default('other'),
   aiConfidence: z.number().min(0).max(1).optional()
 })
 
@@ -36,6 +37,8 @@ export default defineEventHandler(async (event) => {
       longitude: validated.longitude?.toString(),
       address: validated.address,
       entityId: validated.entityId,
+      category: validated.category,
+      moderationStatus: 'approved', // Auto-approve for now, can be changed later based on logic
       aiConfidence: validated.aiConfidence?.toString(),
       status: 'pending'
     })

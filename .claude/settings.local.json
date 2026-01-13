@@ -4,19 +4,13 @@
       "WebFetch(domain:github.com)",
       "Bash(bun add:*)",
       "Bash(git init:*)",
-      "Bash(gh repo create:*)",
-      "Bash(gh repo delete:*)",
-      "Bash(git remote:*)",
-      "Bash(bun run db:seed:*)",
-      "Bash(bun run db:generate:*)",
-      "Bash(bun run:*)",
-      "Bash(cat:*)",
-      "mcp__plugin_context7_context7__query-docs",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
-      "mcp__nuxt-ui-remote__get-component",
-      "Bash(bun dev)"
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(git rebase:*)",
+      "Bash(bun dev)",
+      "Bash(ls:*)",
+      "Bash(curl:*)"
     ]
   }
 }
