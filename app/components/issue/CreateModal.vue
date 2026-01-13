@@ -13,19 +13,18 @@ const toast = useToast()
 const isSubmitting = ref(false)
 const isClassifying = ref(false)
 
-// Categories
-// Categories
+// Categories - hardcoded to avoid i18n hydration issues
 const { categoryColors } = useMarkerIcon()
-const categoryOptions = computed(() => [
-  { label: t('category.pothole'), value: 'pothole', icon: 'alert-triangle' },
-  { label: t('category.trash'), value: 'trash', icon: 'trash-2' },
-  { label: t('category.lighting'), value: 'lighting', icon: 'lightbulb' },
-  { label: t('category.security'), value: 'security', icon: 'shield-alert' },
-  { label: t('category.trees'), value: 'trees', icon: 'trees' },
-  { label: t('category.water'), value: 'water', icon: 'droplets' },
-  { label: t('category.infrastructure'), value: 'infrastructure', icon: 'construction' },
-  { label: t('category.other'), value: 'other', icon: 'help-circle' }
-])
+const categoryOptions = [
+  { label: 'Bache', value: 'pothole' },
+  { label: 'Basura', value: 'trash' },
+  { label: 'Alumbrado', value: 'lighting' },
+  { label: 'Seguridad', value: 'security' },
+  { label: 'Arbolado', value: 'trees' },
+  { label: 'Agua', value: 'water' },
+  { label: 'Infraestructura', value: 'infrastructure' },
+  { label: 'Otro', value: 'other' }
+]
 
 const form = ref({
   title: '',
