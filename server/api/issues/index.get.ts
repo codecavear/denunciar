@@ -1,4 +1,4 @@
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and } from 'drizzle-orm'
 import { getDb } from '../../utils/db'
 import { issues, entities, users } from '../../database/schema'
 
@@ -13,7 +13,15 @@ export default defineEventHandler(async (event) => {
 
   const db = getDb()
 
-  let queryBuilder = db
+  // Build the where conditions
+  const whereConditions = status
+    ? and(
+        eq(issues.userId, session.user.id),
+        eq(issues.status, status as 'pending' | 'in_progress' | 'resolved' | 'closed')
+      )
+    : eq(issues.userId, session.user.id)
+
+  const result = await db
     .select({
       issue: issues,
       entity: entities,
@@ -22,14 +30,8 @@ export default defineEventHandler(async (event) => {
     .from(issues)
     .leftJoin(entities, eq(issues.entityId, entities.id))
     .leftJoin(users, eq(issues.userId, users.id))
-    .where(eq(issues.userId, session.user.id))
+    .where(whereConditions)
     .orderBy(desc(issues.createdAt))
-
-  if (status) {
-    queryBuilder = queryBuilder.where(eq(issues.status, status as 'pending' | 'in_progress' | 'resolved' | 'closed'))
-  }
-
-  const result = await queryBuilder
 
   return result.map(({ issue, entity, user }) => ({
     ...issue,

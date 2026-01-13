@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import type { Issue, Entity } from '~/server/database/schema'
+import type { Issue, Entity } from '#shared/types'
 
 defineProps<{
   issue: Issue & { entity?: Entity | null }
 }>()
 
-const statusColors: Record<string, string> = {
+type BadgeColor = 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | 'neutral'
+
+const statusColors: Record<string, BadgeColor> = {
   pending: 'warning',
   in_progress: 'info',
   resolved: 'success',

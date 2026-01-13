@@ -22,12 +22,9 @@ useSeoMeta({
   twitterCard: 'summary_large_image'
 })
 
-const { data: navigation } = await useAsyncData('navigation', () => queryCollectionNavigation('docs'), {
-  transform: data => data.find(item => item.path === '/docs')?.children || []
-})
-const { data: files } = useLazyAsyncData('search', () => queryCollectionSearchSections('docs'), {
-  server: false
-})
+// Content navigation and search removed - @nuxt/content not installed
+const navigation = ref<any[]>([])
+const files = ref<any[]>([])
 
 const links = [{
   label: 'Docs',

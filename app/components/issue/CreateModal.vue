@@ -38,7 +38,7 @@ async function classifyIssue() {
 
   isClassifying.value = true
   try {
-    const result = await $fetch('/api/ai/classify', {
+    const result = await $fetch<{ entityId: string | null; confidence: number; reason: string }>('/api/ai/classify', {
       method: 'POST',
       body: {
         description: form.value.description,

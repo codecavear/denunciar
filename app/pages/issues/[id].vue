@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Issue, Entity } from '~/server/database/schema'
+import type { Issue, Entity } from '#shared/types'
 
 definePageMeta({
   middleware: 'auth'
@@ -39,6 +39,7 @@ async function saveChanges() {
   isSaving.value = true
   try {
     await $fetch(`/api/issues/${issueId}`, {
+      // @ts-expect-error - Nuxt typed routes restricts method types incorrectly
       method: 'PUT',
       body: editForm.value
     })
@@ -60,7 +61,9 @@ const statusOptions = [
   { label: 'Closed', value: 'closed' }
 ]
 
-const statusColors: Record<string, string> = {
+type BadgeColor = 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | 'neutral'
+
+const statusColors: Record<string, BadgeColor> = {
   pending: 'warning',
   in_progress: 'info',
   resolved: 'success',
@@ -130,8 +133,8 @@ function formatDate(date: Date | string) {
             />
           </template>
           <template v-else>
-            <UBadge :color="statusColors[issue.status]" size="lg">
-              {{ statusOptions.find(s => s.value === issue.status)?.label }}
+            <UBadge :color="statusColors[issue?.status ?? 'pending']" size="lg">
+              {{ statusOptions.find(s => s.value === issue?.status)?.label }}
             </UBadge>
           </template>
         </div>

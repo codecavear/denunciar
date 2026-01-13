@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Entity } from '~/server/database/schema'
+import type { Entity } from '#shared/types'
 
 definePageMeta({
   middleware: 'auth'

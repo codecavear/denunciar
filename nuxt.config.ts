@@ -37,7 +37,6 @@ export default defineNuxtConfig({
       { code: 'es', language: 'es-ES', name: 'Español', file: 'es.json' }
     ],
     defaultLocale: 'es',
-    lazy: true,
     langDir: 'locales',
     strategy: 'no_prefix',
     detectBrowserLanguage: {
@@ -87,5 +86,9 @@ export default defineNuxtConfig({
         braceStyle: '1tbs'
       }
     }
+  },
+
+  experimental: {
+    typedPages: false
   }
 })

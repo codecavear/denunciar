@@ -10,7 +10,10 @@
       "Bash(git rebase:*)",
       "Bash(bun dev)",
       "Bash(ls:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(bun typecheck:*)",
+      "Bash(bunx nuxi prepare:*)",
+      "Bash(git add -A)"
     ]
   }
 }

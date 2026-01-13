@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Issue, Entity } from '~/server/database/schema'
+import type { Issue, Entity } from '#shared/types'
 import { LazyIssueCreateModal } from '#components'
 
 definePageMeta({
@@ -39,7 +39,7 @@ const statusColors: Record<string, string> = {
   closed: '#9ca3af' // Gray (Neutral)
 }
 
-const statusLabels = computed(() => ({
+const statusLabels = computed<Record<string, string>>(() => ({
   pending: t('status.pending'),
   in_progress: t('status.in_progress'),
   resolved: t('status.resolved'),
@@ -187,7 +187,7 @@ function getIconSvgPath(iconName: string): string {
     'construction': '<rect x="2" y="6" width="20" height="8" rx="1"/><path d="M17 14v7"/><path d="M7 14v7"/><path d="M17 3v3"/><path d="M7 3v3"/><path d="M10 14 2.3 6.3"/><path d="m14 6 7.7 7.7"/><path d="m8 6 8 8"/>',
     'help-circle': '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>'
   }
-  return paths[iconName] || paths['alert-circle']
+  return paths[iconName] ?? paths['alert-circle'] ?? ''
 }
 
 // Category Filter
@@ -302,6 +302,7 @@ async function toggleConfirm(issue: PublicIssue) {
 async function markResolved(issue: PublicIssue) {
   try {
     await $fetch(`/api/issues/${issue.id}`, {
+      // @ts-expect-error - Nuxt typed routes restricts method types incorrectly
       method: 'PUT',
       body: { status: 'resolved' }
     })
@@ -315,6 +316,7 @@ async function markResolved(issue: PublicIssue) {
 
 async function deleteIssue(issue: PublicIssue) {
   try {
+    // @ts-expect-error - Nuxt typed routes restricts method types incorrectly
     await $fetch(`/api/issues/${issue.id}`, { method: 'DELETE' })
     await refreshIssues()
     addMarkers()

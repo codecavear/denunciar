@@ -34,6 +34,10 @@ export default defineOAuthGoogleEventHandler({
       dbUser = updatedUser
     }
 
+    if (!dbUser) {
+      throw createError({ statusCode: 500, message: 'Failed to create or update user' })
+    }
+
     await setUserSession(event, {
       user: {
         id: dbUser.id,

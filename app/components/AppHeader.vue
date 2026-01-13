@@ -31,7 +31,7 @@ const items = computed(() => {
 const localeItems = computed(() => {
   return (locales.value as Array<{ code: string; name: string }>).map(l => ({
     label: l.name,
-    onSelect: () => setLocale(l.code)
+    onSelect: () => setLocale(l.code as 'en' | 'es')
   }))
 })
 </script>
@@ -119,7 +119,7 @@ const localeItems = computed(() => {
           :color="locale === l.code ? 'primary' : 'neutral'"
           :variant="locale === l.code ? 'solid' : 'ghost'"
           size="sm"
-          @click="setLocale(l.code)"
+          @click="setLocale(l.code as 'en' | 'es')"
         />
       </div>
 

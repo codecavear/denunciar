@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Entity } from '~/server/database/schema'
+import type { Entity } from '#shared/types'
 
 const props = defineProps<{
   modelValue?: string | null
@@ -13,8 +13,8 @@ const emit = defineEmits<{
 const { data: entities } = await useFetch<Entity[]>('/api/entities')
 
 const selected = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
+  get: () => props.modelValue ?? undefined,
+  set: (value: string | null | undefined) => emit('update:modelValue', value ?? null)
 })
 
 const options = computed(() => {

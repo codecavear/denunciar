@@ -18,6 +18,8 @@ async function handleFiles(files: FileList | null) {
   if (!files || files.length === 0) return
 
   const file = files[0]
+  if (!file) return
+
   if (!file.type.startsWith('image/')) {
     error.value = 'Please select an image file'
     return
