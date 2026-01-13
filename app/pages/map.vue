@@ -49,22 +49,21 @@ const statusLabels = computed<Record<string, string>>(() => ({
 // Definition of Category Configuration (Icon + Label only, color from composable)
 const { getPinSvg, getPinDataUrl, categoryColors, anchorPoint, size } = useMarkerIcon()
 
-// IMPORTANT: These paths must perfectly match the ones in useMarkerIcon and EntitySelector
-// IMPORTANT: These paths must perfectly match the ones in useMarkerIcon and EntitySelector
-const categoryConfig = computed<Record<string, { icon: string, label: string }>>(() => ({
-  pothole: { icon: 'alert-triangle', label: t('category.pothole') },
-  trash: { icon: 'trash-2', label: t('category.trash') },
-  lighting: { icon: 'lightbulb', label: t('category.lighting') },
-  security: { icon: 'shield-alert', label: t('category.security') }, // Was 'safety'
-  trees: { icon: 'trees', label: t('category.trees') }, // Added
-  water: { icon: 'droplets', label: t('category.water') },
-  infrastructure: { icon: 'construction', label: t('category.infrastructure') },
-  other: { icon: 'help-circle', label: t('category.other') }
-}))
+// Hardcoded labels to avoid i18n SSR hydration issues
+const categoryConfig: Record<string, { icon: string, label: string }> = {
+  pothole: { icon: 'alert-triangle', label: 'Bache' },
+  trash: { icon: 'trash-2', label: 'Basura' },
+  lighting: { icon: 'lightbulb', label: 'Alumbrado' },
+  security: { icon: 'shield-alert', label: 'Seguridad' },
+  trees: { icon: 'trees', label: 'Arbolado' },
+  water: { icon: 'droplets', label: 'Agua' },
+  infrastructure: { icon: 'construction', label: 'Infraestructura' },
+  other: { icon: 'help-circle', label: 'Otro' }
+}
 
 function getCategoryIcon(category: string | null | undefined): string {
   const cat = category || 'other'
-  const icon = categoryConfig.value[cat]?.icon || 'help-circle'
+  const icon = categoryConfig[cat]?.icon || 'help-circle'
   return `i-lucide-${icon}`
 }
 
