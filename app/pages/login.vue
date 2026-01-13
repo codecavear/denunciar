@@ -25,18 +25,18 @@ if (redirectParam) {
   authRedirectCookie.value = redirectParam
 }
 
-// Redirect logged-in users
-if (loggedIn.value) {
-  // If there's a pending redirect, honor it
-  if (authRedirectCookie.value) {
-    const redirectTo = authRedirectCookie.value
-    authRedirectCookie.value = null
-    navigateTo(redirectTo)
+// Redirect logged-in users (client-side only)
+onMounted(() => {
+  if (loggedIn.value) {
+    if (authRedirectCookie.value) {
+      const redirectTo = authRedirectCookie.value
+      authRedirectCookie.value = null
+      navigateTo(redirectTo)
+    } else {
+      navigateTo('/map')
+    }
   }
-  else {
-    navigateTo('/')
-  }
-}
+})
 
 const providers = [{
   label: t('auth.continueGoogle'),
