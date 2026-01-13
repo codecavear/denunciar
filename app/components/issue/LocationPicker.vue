@@ -61,11 +61,18 @@ async function initMap() {
 
   geocoder.value = new Geocoder()
 
+  const { getPinDataUrl, anchorPoint, size } = useMarkerIcon()
+
   marker.value = new Marker({
     map: map.value,
     draggable: true,
     position: props.latitude && props.longitude ? center : undefined,
-    visible: !!(props.latitude && props.longitude)
+    visible: !!(props.latitude && props.longitude),
+    icon: {
+      url: getPinDataUrl('location'),
+      anchor: new google.maps.Point(anchorPoint.x, anchorPoint.y),
+      scaledSize: new google.maps.Size(size.width, size.height)
+    }
   })
 
   map.value.addListener('click', (e: google.maps.MapMouseEvent) => {

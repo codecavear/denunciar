@@ -46,24 +46,19 @@ const statusLabels = computed<Record<string, string>>(() => ({
   closed: t('status.closed')
 }))
 
-// Definition of Category Configuration (Icon + Color override/fallback)
-// Using Waze-style intuitive icons
-// IMPORTANT: These paths must perfectly match the ones in CategorySelector or be imported from a shared source. 
-// For now duplicating for simplicity in this MVP.
+// Definition of Category Configuration (Icon + Label only, color from composable)
+const { getPinSvg, getPinDataUrl, categoryColors, anchorPoint, size } = useMarkerIcon()
+
+// IMPORTANT: These paths must perfectly match the ones in useMarkerIcon and EntitySelector
 const categoryConfig: Record<string, { icon: string, label: string }> = {
   pothole: { icon: 'alert-triangle', label: 'Pothole' },
   trash: { icon: 'trash-2', label: 'Trash' },
   lighting: { icon: 'lightbulb', label: 'Lighting' },
-  safety: { icon: 'shield-alert', label: 'Safety' },
+  security: { icon: 'shield-alert', label: 'Security' }, // Was 'safety'
+  trees: { icon: 'trees', label: 'Trees' }, // Added
   water: { icon: 'droplets', label: 'Water Leak' },
   infrastructure: { icon: 'construction', label: 'Infrastructure' },
   other: { icon: 'help-circle', label: 'Other' }
-}
-
-function getIconPath(category: string): string {
-  const iconName = categoryConfig[category]?.icon || 'help-circle'
-  // Return SVG path data for each icon
-  return getIconSvgPath(iconName)
 }
 
 function getCategoryIcon(category: string | null | undefined): string {
@@ -122,72 +117,8 @@ async function initMap() {
   }
 }
 
-function createMarkerContent(issue: PublicIssue): HTMLElement {
-  const statusColor = statusColors[issue.status] || statusColors.pending
-  const category = issue.category || 'other'
-  const iconPath = getIconPath(category)
-
-  const container = document.createElement('div')
-  container.className = 'marker-container'
-  // Waze-style: Round balloon with icon inside. Border color indicates status.
-  container.innerHTML = `
-    <div style="
-      position: relative;
-      width: 44px;
-      height: 44px;
-      background: white;
-      border: 4px solid ${statusColor};
-      border-radius: 50% 50% 50% 10%;
-      transform: rotate(-45deg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-      cursor: pointer;
-      transition: transform 0.2s;
-    ">
-      <div style="transform: rotate(45deg); display: flex; align-items: center; justify-content: center;">
-        <svg style="
-          width: 24px;
-          height: 24px;
-          fill: none;
-          stroke: #374151; /* Gray-700 */
-          stroke-width: 2;
-          stroke-linecap: round;
-          stroke-linejoin: round;
-        " viewBox="0 0 24 24">
-          ${iconPath}
-        </svg>
-      </div>
-    </div>
-  `
-  
-  // Add hover effect via event listeners if needed, or simple CSS class (but style is inline here)
-  container.onmouseenter = () => { container.firstElementChild!.setAttribute('style', container.firstElementChild!.getAttribute('style') + ' transform: rotate(-45deg) scale(1.1);') }
-  container.onmouseleave = () => { container.firstElementChild!.setAttribute('style', container.firstElementChild!.getAttribute('style')!.replace(' scale(1.1)', '')) }
-
-  return container
-}
-
-function getIconSvgPath(iconName: string): string {
-  const paths: Record<string, string> = {
-    'droplets': '<path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/>',
-    'road': '<path d="M4 19h4v-6h8v6h4M12 3v8M8 13h8"/>',
-    'lightbulb': '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
-    'trash-2': '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
-    'trees': '<path d="M10 10v.2A3 3 0 0 1 8.9 16v0H5v0h0a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0z"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M10.9 12.9a8 8 0 0 1 10.1 7.1h0a3 3 0 0 1-3 3h0H8"/>',
-    'shield-alert': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
-    'building': '<rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/>',
-    'alert-circle': '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
-    'alert-triangle': '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/>',
-    'construction': '<rect x="2" y="6" width="20" height="8" rx="1"/><path d="M17 14v7"/><path d="M7 14v7"/><path d="M17 3v3"/><path d="M7 3v3"/><path d="M10 14 2.3 6.3"/><path d="m14 6 7.7 7.7"/><path d="m8 6 8 8"/>',
-    'help-circle': '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>'
-  }
-  return paths[iconName] ?? paths['alert-circle'] ?? ''
-}
-
 // Category Filter
-const activeCategories = ref<Set<string>>(new Set(Object.keys(categoryConfig)))
+const activeCategories = ref<Set<string>>(new Set(Object.keys(categoryColors)))
 
 function toggleCategory(category: string) {
   if (activeCategories.value.has(category)) {
@@ -231,10 +162,19 @@ function toggleCategory(category: string) {
     }
 
     if (useAdvancedMarkers) {
+      // Create a DOM element for the marker content
+      const contentEl = document.createElement('div')
+      contentEl.innerHTML = getPinSvg(issue.category)
+      contentEl.style.cursor = 'pointer'
+
+      // Add simple hover scale effect
+      contentEl.onmouseenter = () => { contentEl.style.transform = 'scale(1.1)'; contentEl.style.transition = 'transform 0.2s'; }
+      contentEl.onmouseleave = () => { contentEl.style.transform = 'scale(1.0)' }
+
       const marker = new google.maps.marker.AdvancedMarkerElement({
         position,
         map: map.value,
-        content: createMarkerContent(issue),
+        content: contentEl,
         title: issue.title
       })
       marker.addListener('click', () => {
@@ -242,21 +182,15 @@ function toggleCategory(category: string) {
       })
       markers.value.push(marker)
     } else {
-      // Robust Fallback: Standard Google Maps Marker
-      // We can't render the complex HTML balloon, but we CAN render a colored circle/pin
-      const color = statusColors[issue.status] || '#f59e0b'
-
+      // Robust Fallback: Standard Google Maps Marker with SVG Icon
       const marker = new google.maps.Marker({
         position,
         map: map.value,
         title: issue.title,
         icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 10,
-          fillColor: color,
-          fillOpacity: 1,
-          strokeColor: 'white',
-          strokeWeight: 2
+          url: getPinDataUrl(issue.category),
+          anchor: new google.maps.Point(anchorPoint.x, anchorPoint.y), // Updated for 3D Bubble
+          scaledSize: new google.maps.Size(size.width, size.height)
         }
       })
       marker.addListener('click', () => {
