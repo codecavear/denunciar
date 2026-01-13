@@ -17,7 +17,8 @@ export function useMarkerIcon() {
     lighting: 'M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5 M9 18h6 M10 22h4', // Lightbulb
     trash: 'M3 6h18 M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6 M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2', // Trash 2
     trees: 'M10 10v.2A3 3 0 0 1 8.9 16v0H5v0h0a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0z M7 16v6 M13 19v3 M10.9 12.9a8 8 0 0 1 10.1 7.1h0a3 3 0 0 1-3 3h0H8', // Trees
-    security: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M12 8v4 M12 16h.01', // Shield Alert (Renamed from safety)
+    security: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M12 8v4 M12 16h.01', // Shield Alert
+    safety: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M12 8v4 M12 16h.01', // Alias for DB compatibility
     water: 'M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z', // Droplet
     infrastructure: 'M2 22h20 M2 6h20 M2 14h20 M6 2v20 M18 2v20', // Construction grid
     other: 'M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10z M12 16v.01 M12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4', // Help Circle
@@ -31,6 +32,7 @@ export function useMarkerIcon() {
         trash: categoryColors.trash,
         trees: '#22C55E', // Green-500
         security: categoryColors.safety,
+        safety: categoryColors.safety, // Alias
         water: categoryColors.water,
         infrastructure: categoryColors.infrastructure,
         other: categoryColors.other,

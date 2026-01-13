@@ -7,15 +7,18 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
-const categories = [
-  { value: 'pothole', label: 'Pothole', icon: 'i-lucide-alert-triangle', color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-950/30', border: 'border-orange-200 dark:border-orange-800' },
-  { value: 'trash', label: 'Trash', icon: 'i-lucide-trash-2', color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-50 dark:bg-gray-900', border: 'border-gray-200 dark:border-gray-800' },
-  { value: 'lighting', label: 'Lighting', icon: 'i-lucide-lightbulb', color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-950/30', border: 'border-yellow-200 dark:border-yellow-800' },
-  { value: 'safety', label: 'Safety', icon: 'i-lucide-shield-alert', color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-950/30', border: 'border-red-200 dark:border-red-800' },
-  { value: 'water', label: 'Water Leak', icon: 'i-lucide-droplets', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-950/30', border: 'border-blue-200 dark:border-blue-800' },
-  { value: 'infrastructure', label: 'Infra', icon: 'i-lucide-construction', color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/20', border: 'border-orange-200 dark:border-orange-800' },
-  { value: 'other', label: 'Other', icon: 'i-lucide-help-circle', color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-950/30', border: 'border-purple-200 dark:border-purple-800' }
-]
+const { t } = useI18n()
+
+const categories = computed(() => [
+  { value: 'pothole', label: t('category.pothole'), icon: 'i-lucide-alert-triangle', color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-950/30' },
+  { value: 'trash', label: t('category.trash'), icon: 'i-lucide-trash-2', color: 'text-lime-500', bg: 'bg-lime-50 dark:bg-lime-950/30' },
+  { value: 'lighting', label: t('category.lighting'), icon: 'i-lucide-lightbulb', color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-950/30' },
+  { value: 'security', label: t('category.security'), icon: 'i-lucide-shield-alert', color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-950/30' },
+  { value: 'trees', label: t('category.trees'), icon: 'i-lucide-trees', color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-950/30' },
+  { value: 'water', label: t('category.water'), icon: 'i-lucide-droplets', color: 'text-sky-500', bg: 'bg-sky-50 dark:bg-sky-950/30' },
+  { value: 'infrastructure', label: t('category.infrastructure'), icon: 'i-lucide-construction', color: 'text-slate-500', bg: 'bg-slate-50 dark:bg-slate-950/30' },
+  { value: 'other', label: t('category.other'), icon: 'i-lucide-help-circle', color: 'text-gray-500', bg: 'bg-gray-50 dark:bg-gray-950/30' }
+])
 
 function select(value: string) {
   emit('update:modelValue', value)

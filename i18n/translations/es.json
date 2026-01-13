@@ -64,6 +64,7 @@
     "descriptionPlaceholder": "Describe el problema en detalle...",
     "location": "Ubicacion",
     "department": "Departamento",
+    "category": "Categoría",
     "submitReport": "Enviar Reporte",
     "reportCreated": "Reporte creado exitosamente",
     "reportFailed": "Error al crear el reporte",

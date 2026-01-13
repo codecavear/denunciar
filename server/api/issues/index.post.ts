@@ -11,7 +11,7 @@ const createIssueSchema = z.object({
   longitude: z.number().min(-180).max(180).nullable().optional(),
   address: z.string().nullable().optional(),
   entityId: z.string().uuid().nullable().optional(),
-  category: z.enum(['pothole', 'trash', 'lighting', 'safety', 'water', 'infrastructure', 'other']).default('other'),
+  category: z.enum(['pothole', 'trash', 'lighting', 'security', 'trees', 'water', 'infrastructure', 'other']).default('other'),
   aiConfidence: z.number().min(0).max(1).nullable().optional()
 })
 

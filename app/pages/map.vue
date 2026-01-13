@@ -13,7 +13,7 @@ type PublicIssue = Issue & {
 }
 
 const config = useRuntimeConfig()
-const { loggedIn, user } = useUserSession()
+const { loggedIn, user, clear } = useUserSession()
 const toast = useToast()
 const { t } = useI18n()
 const overlay = useOverlay()
@@ -127,17 +127,52 @@ function toggleCategory(category: string) {
   } else {
     activeCategories.value.add(category)
   }
-  // Trigger reactivity for set
   activeCategories.value = new Set(activeCategories.value)
+}
+
+function centerMap() {
+  if (!map.value || !navigator.geolocation) return
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      map.value?.setCenter({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      })
+      map.value?.setZoom(16)
+    },
+    (error) => {
+      console.error('Error getting location', error)
+      toast.add({ title: t('map.locationError'), color: 'error' })
+    }
+  )
+}
+
+async function logout() {
+  await clear()
+  navigateTo('/auth/login')
 }
 
   function addMarkers() {
   if (!map.value || !issues.value) return
 
-  // Clear existing markers
-  markers.value.forEach((m: any) => {
-    if (m.map !== undefined) m.map = null
-  })
+  // Clear existing markers robustly
+  if (markers.value.length > 0) {
+    for (const m of markers.value) {
+      try {
+        if (typeof (m as any).setMap === 'function') {
+          (m as any).setMap(null)
+        } 
+        // @ts-expect-error - AdvancedMarkerElement uses .map
+        if (m.map) {
+          m.map = null
+        }
+      } catch (e) {
+        console.error('Error clearing marker:', e)
+      }
+    }
+  }
+  // Reset array completely
   markers.value = []
 
   // Check support for AdvancedMarkerElement AND valid Map ID
@@ -339,7 +374,27 @@ async function openCreateModal() {
     </div>
 
     <!-- Report button -->
-    <div class="absolute bottom-4 right-4 z-40">
+    <!-- Top Right Controls (Logout) -->
+    <div class="absolute top-4 right-4 z-40">
+      <UButton
+        v-if="loggedIn"
+        icon="i-lucide-log-out"
+        color="white"
+        variant="solid"
+        class="shadow-md"
+        @click="logout"
+      />
+    </div>
+
+    <!-- Bottom Right Controls (Location & Report) -->
+    <div class="absolute bottom-4 right-4 z-40 flex flex-col gap-2">
+      <UButton
+        icon="i-lucide-crosshair"
+        color="white"
+        variant="solid"
+        class="shadow-md"
+        @click="centerMap"
+      />
       <UButton
         icon="i-lucide-plus"
         size="lg"

@@ -13,6 +13,20 @@ const toast = useToast()
 const isSubmitting = ref(false)
 const isClassifying = ref(false)
 
+// Categories
+// Categories
+const { categoryColors } = useMarkerIcon()
+const categoryOptions = computed(() => [
+  { label: t('category.pothole'), value: 'pothole', icon: 'alert-triangle' },
+  { label: t('category.trash'), value: 'trash', icon: 'trash-2' },
+  { label: t('category.lighting'), value: 'lighting', icon: 'lightbulb' },
+  { label: t('category.security'), value: 'security', icon: 'shield-alert' },
+  { label: t('category.trees'), value: 'trees', icon: 'trees' },
+  { label: t('category.water'), value: 'water', icon: 'droplets' },
+  { label: t('category.infrastructure'), value: 'infrastructure', icon: 'construction' },
+  { label: t('category.other'), value: 'other', icon: 'help-circle' }
+])
+
 const form = ref({
   title: '',
   description: '',
@@ -20,7 +34,8 @@ const form = ref({
   latitude: null as number | null,
   longitude: null as number | null,
   address: null as string | null,
-  entityId: null as string | null
+  entityId: null as string | null,
+  category: 'other' // Default
 })
 
 const aiSuggestion = ref<{ entityId: string | null; confidence: number; reason: string } | null>(null)
@@ -87,6 +102,7 @@ async function submitForm() {
         longitude: form.value.longitude,
         address: form.value.address,
         entityId: form.value.entityId,
+        category: form.value.category,
         aiConfidence: aiSuggestion.value?.confidence
       }
     })
@@ -135,6 +151,25 @@ function close() {
           />
         </UFormField>
 
+        <UFormField :label="t('issue.category')" required>
+          <USelectMenu
+            v-model="form.category"
+            :options="categoryOptions"
+            option-attribute="label"
+            value-attribute="value"
+            :searchable="false"
+            placeholder="Select a category"
+            class="w-full"
+          >
+            <template #option="{ option }">
+              <span class="flex items-center gap-2">
+                 <UIcon :name="'i-lucide-' + option.icon" class="w-4 h-4 text-gray-500" />
+                 <span>{{ option.label }}</span>
+              </span>
+            </template>
+          </USelectMenu>
+        </UFormField>
+
         <UFormField :label="t('issue.location')">
           <IssueLocationPicker
             v-model:latitude="form.latitude"
@@ -143,20 +178,23 @@ function close() {
           />
         </UFormField>
 
-        <UFormField :label="t('issue.department')">
-          <div class="relative">
-            <IssueEntitySelector
-              v-model="form.entityId"
-              :ai-suggestion="aiSuggestion"
-            />
-            <div
-              v-if="isClassifying"
-              class="absolute right-3 top-1/2 -translate-y-1/2"
-            >
-              <UIcon name="i-lucide-loader-2" class="w-4 h-4 animate-spin text-primary" />
+        <!-- Department Hidden as per user request -->
+        <div class="hidden">
+           <UFormField :label="t('issue.department')">
+            <div class="relative">
+              <IssueEntitySelector
+                v-model="form.entityId"
+                :ai-suggestion="aiSuggestion"
+              />
+              <div
+                v-if="isClassifying"
+                class="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                <UIcon name="i-lucide-loader-2" class="w-4 h-4 animate-spin text-primary" />
+              </div>
             </div>
-          </div>
-        </UFormField>
+           </UFormField>
+        </div>
       </form>
     </template>
 

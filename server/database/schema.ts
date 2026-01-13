@@ -3,7 +3,7 @@ import { relations } from 'drizzle-orm'
 
 // Enums
 export const issueStatusEnum = pgEnum('issue_status', ['pending', 'in_progress', 'resolved', 'closed'])
-export const issueCategoryEnum = pgEnum('issue_category', ['pothole', 'trash', 'lighting', 'safety', 'water', 'infrastructure', 'other'])
+export const issueCategoryEnum = pgEnum('issue_category', ['pothole', 'trash', 'lighting', 'security', 'trees', 'water', 'infrastructure', 'other'])
 export const moderationStatusEnum = pgEnum('moderation_status', ['pending', 'approved', 'rejected'])
 
 // Users table
