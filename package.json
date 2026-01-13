@@ -6,7 +6,7 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "start": "bun run server/scripts/migrate.ts && node .output/server/index.mjs",
+    "start": "node .output/server/index.mjs",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
