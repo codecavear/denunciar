@@ -32,22 +32,17 @@ const { data: myConfirmations, refresh: refreshConfirmations } = await useFetch<
 
 const defaultCenter = { lat: -31.4201, lng: -64.1888 } // Cordoba, Argentina
 
-const statusColors: Record<string, string> = {
-  pending: '#f59e0b', // Orange (Warning)
-  in_progress: '#3b82f6', // Blue (Info)
-  resolved: '#22c55e', // Green (Success)
-  closed: '#9ca3af' // Gray (Neutral)
+// Hardcoded status labels to avoid i18n SSR hydration issues
+const statusLabels: Record<string, string> = {
+  pending: 'Pendiente',
+  in_progress: 'En Progreso',
+  resolved: 'Resuelto',
+  closed: 'Cerrado',
+  rejected: 'Rechazado'
 }
 
-const statusLabels = computed<Record<string, string>>(() => ({
-  pending: t('status.pending'),
-  in_progress: t('status.in_progress'),
-  resolved: t('status.resolved'),
-  closed: t('status.closed')
-}))
-
 // Definition of Category Configuration (Icon + Label only, color from composable)
-const { getPinSvg, getPinDataUrl, categoryColors, anchorPoint, size } = useMarkerIcon()
+const { getPinSvg, getPinDataUrl, categoryColors, statusColors, anchorPoint, size } = useMarkerIcon()
 
 // Hardcoded labels to avoid i18n SSR hydration issues
 const categoryConfig: Record<string, { icon: string, label: string }> = {
@@ -198,7 +193,8 @@ async function logout() {
     if (useAdvancedMarkers) {
       // Create a DOM element for the marker content
       const contentEl = document.createElement('div')
-      contentEl.innerHTML = getPinSvg(issue.category)
+      // Pass category AND status to get the correct icon (white on status-colored pin)
+      contentEl.innerHTML = getPinSvg(issue.category, issue.status)
       contentEl.style.cursor = 'pointer'
 
       // Add simple hover scale effect
@@ -222,7 +218,7 @@ async function logout() {
         map: map.value,
         title: issue.title,
         icon: {
-          url: getPinDataUrl(issue.category),
+          url: getPinDataUrl(issue.category, issue.status),
           anchor: new google.maps.Point(anchorPoint.x, anchorPoint.y), // Updated for 3D Bubble
           scaledSize: new google.maps.Size(size.width, size.height)
         }
@@ -239,7 +235,7 @@ watch(issues, () => {
   if (isMapLoaded.value) {
     addMarkers()
   }
-})
+}, { immediate: true })
 
 // Fix for filter reactivity: Explicitly watch the Set size/content changes or just the ref itself
 // Since we re-assign the Set in toggleCategory, deep watch or standard watch should work.
