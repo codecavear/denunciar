@@ -2,6 +2,11 @@ import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import { getDb } from '../utils/db'
 
 export default defineNitroPlugin(async () => {
+  // Temporary disable auto-migration on production to fix Railway crash
+  // We suspect filesystem access to 'drizzle/migrations' is failing in the bundled environment.
+  // Since we ran migrations manually, it's safe to skip this for now.
+  return 
+
   if (process.env.NODE_ENV !== 'production') return
 
   console.log('🚀 Checking for pending migrations...')
