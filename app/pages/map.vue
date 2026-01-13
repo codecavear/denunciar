@@ -379,20 +379,21 @@ async function openCreateModal() {
       <UButton
         v-if="loggedIn"
         icon="i-lucide-log-out"
-        color="white"
+        color="neutral"
         variant="solid"
-        class="shadow-md"
+        class="shadow-md bg-white dark:bg-gray-800"
         @click="logout"
       />
     </div>
 
     <!-- Bottom Right Controls (Location & Report) -->
-    <div class="absolute bottom-4 right-4 z-40 flex flex-col gap-2">
+    <div class="absolute bottom-4 right-4 z-40 flex flex-col items-end gap-2">
       <UButton
         icon="i-lucide-crosshair"
-        color="white"
-        variant="solid"
-        class="shadow-md"
+        color="neutral"
+        variant="outline"
+        square
+        class="shadow-md !bg-white !text-gray-700 border-gray-200"
         @click="centerMap"
       />
       <UButton

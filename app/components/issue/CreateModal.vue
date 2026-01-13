@@ -152,22 +152,14 @@ function close() {
         </UFormField>
 
         <UFormField :label="t('issue.category')" required>
-          <USelectMenu
+          <select
             v-model="form.category"
-            :options="categoryOptions"
-            option-attribute="label"
-            value-attribute="value"
-            :searchable="false"
-            placeholder="Select a category"
-            class="w-full"
+            class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <template #option="{ option }">
-              <span class="flex items-center gap-2">
-                 <UIcon :name="'i-lucide-' + option.icon" class="w-4 h-4 text-gray-500" />
-                 <span>{{ option.label }}</span>
-              </span>
-            </template>
-          </USelectMenu>
+            <option v-for="cat in categoryOptions" :key="cat.value" :value="cat.value">
+              {{ cat.label }}
+            </option>
+          </select>
         </UFormField>
 
         <UFormField :label="t('issue.location')">
