@@ -20,8 +20,8 @@ const overlay = useOverlay()
 const issueModal = overlay.create(LazyIssueCreateModal)
 
 const mapContainer = ref<HTMLDivElement>()
-const map = ref<google.maps.Map>()
-const markers = ref<(google.maps.marker.AdvancedMarkerElement | google.maps.Marker)[]>([])
+const map = shallowRef<google.maps.Map>()
+const markers = shallowRef<(google.maps.marker.AdvancedMarkerElement | google.maps.Marker)[]>([])
 const isMapLoaded = ref(false)
 
 const selectedIssue = ref<PublicIssue | null>(null)
@@ -50,20 +50,21 @@ const statusLabels = computed<Record<string, string>>(() => ({
 const { getPinSvg, getPinDataUrl, categoryColors, anchorPoint, size } = useMarkerIcon()
 
 // IMPORTANT: These paths must perfectly match the ones in useMarkerIcon and EntitySelector
-const categoryConfig: Record<string, { icon: string, label: string }> = {
-  pothole: { icon: 'alert-triangle', label: 'Pothole' },
-  trash: { icon: 'trash-2', label: 'Trash' },
-  lighting: { icon: 'lightbulb', label: 'Lighting' },
-  security: { icon: 'shield-alert', label: 'Security' }, // Was 'safety'
-  trees: { icon: 'trees', label: 'Trees' }, // Added
-  water: { icon: 'droplets', label: 'Water Leak' },
-  infrastructure: { icon: 'construction', label: 'Infrastructure' },
-  other: { icon: 'help-circle', label: 'Other' }
-}
+// IMPORTANT: These paths must perfectly match the ones in useMarkerIcon and EntitySelector
+const categoryConfig = computed<Record<string, { icon: string, label: string }>>(() => ({
+  pothole: { icon: 'alert-triangle', label: t('category.pothole') },
+  trash: { icon: 'trash-2', label: t('category.trash') },
+  lighting: { icon: 'lightbulb', label: t('category.lighting') },
+  security: { icon: 'shield-alert', label: t('category.security') }, // Was 'safety'
+  trees: { icon: 'trees', label: t('category.trees') }, // Added
+  water: { icon: 'droplets', label: t('category.water') },
+  infrastructure: { icon: 'construction', label: t('category.infrastructure') },
+  other: { icon: 'help-circle', label: t('category.other') }
+}))
 
 function getCategoryIcon(category: string | null | undefined): string {
   const cat = category || 'other'
-  const icon = categoryConfig[cat]?.icon || 'help-circle'
+  const icon = categoryConfig.value[cat]?.icon || 'help-circle'
   return `i-lucide-${icon}`
 }
 
@@ -128,7 +129,6 @@ function toggleCategory(category: string) {
   }
   // Trigger reactivity for set
   activeCategories.value = new Set(activeCategories.value)
-  addMarkers()
 }
 
   function addMarkers() {
@@ -206,6 +206,14 @@ watch(issues, () => {
     addMarkers()
   }
 })
+
+// Fix for filter reactivity: Explicitly watch the Set size/content changes or just the ref itself
+// Since we re-assign the Set in toggleCategory, deep watch or standard watch should work.
+watch(activeCategories, () => {
+  if (isMapLoaded.value) {
+    addMarkers()
+  }
+}, { deep: true })
 
 function isOwner(issue: PublicIssue) {
   return user.value?.id === issue.userId
@@ -301,31 +309,31 @@ async function openCreateModal() {
       </div>
     </ClientOnly>
 
-    <!-- Legend (Using Categories now) -->
-    <div class="absolute bottom-4 left-4 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-2 md:p-3 z-40 max-h-[300px] overflow-y-auto">
-      <div class="text-[10px] md:text-xs font-medium text-gray-500 mb-1 md:mb-2">{{ t('map.legend') }}</div>
-      
-      <!-- Category Filter -->
-      <div class="mb-3 space-y-1">
-        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Filter by Type</div>
+    <!-- Category Filters (Interactive) -->
+    <div class="absolute top-20 left-4 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-3 z-40 max-w-[160px]">
+      <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t('map.filterByType') }}</div>
+      <div class="space-y-1">
         <button
           v-for="(config, key) in categoryConfig"
           :key="key"
-          class="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-sm w-full hover:bg-gray-50 dark:hover:bg-gray-800 rounded px-1 transition-colors"
-          :class="activeCategories.has(key) ? 'opacity-100' : 'opacity-40 grayscale'"
+          class="flex items-center gap-2 text-xs w-full hover:bg-gray-50 dark:hover:bg-gray-800 rounded px-1.5 py-1 transition-all duration-200"
+          :class="activeCategories.has(key) ? 'bg-gray-50 dark:bg-gray-800 font-medium' : 'opacity-50 grayscale'"
           @click="toggleCategory(key)"
         >
-           <UIcon :name="'i-lucide-' + config.icon" class="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-600 dark:text-gray-400" />
+           <UIcon :name="'i-lucide-' + config.icon" class="w-4 h-4" :style="{ color: activeCategories.has(key) ? categoryColors[key] : 'currentColor' }" />
            <span>{{ config.label }}</span>
+           <UIcon v-if="activeCategories.has(key)" name="i-lucide-check" class="w-3 h-3 ml-auto text-primary" />
         </button>
       </div>
+    </div>
 
-      <!-- Status Legend -->
-      <div class="space-y-1 pt-2 border-t border-gray-100 dark:border-gray-800">
-        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Status</div>
-        <div v-for="(color, status) in statusColors" :key="status" class="flex items-center gap-1.5 md:gap-2 text-[11px] md:text-sm">
-          <div class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border border-gray-300 dark:border-gray-600" :style="{ backgroundColor: color }" />
-          <span>{{ statusLabels[status] }}</span>
+    <!-- Status Legend (Static/Informational) -->
+    <div class="absolute bottom-4 left-4 bg-white/90 dark:bg-gray-900/90 backdrop-blur rounded-lg shadow-lg p-3 z-40 border border-gray-100 dark:border-gray-800">
+      <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t('map.status') }}</div>
+      <div class="flex flex-col gap-1.5">
+        <div v-for="(color, status) in statusColors" :key="status" class="flex items-center gap-2 text-xs">
+          <div class="w-2.5 h-2.5 rounded-full ring-2 ring-white dark:ring-gray-900 shadow-sm" :style="{ backgroundColor: color }" />
+          <span class="text-gray-600 dark:text-gray-300">{{ statusLabels[status] }}</span>
         </div>
       </div>
     </div>
@@ -437,7 +445,7 @@ async function openCreateModal() {
 
             <UButton
               v-if="isOwner(selectedIssue) && selectedIssue.status !== 'resolved'"
-              color="success"
+              color="primary"
               class="flex-1"
               @click="markResolved(selectedIssue)"
             >

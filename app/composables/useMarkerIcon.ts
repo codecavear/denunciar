@@ -40,88 +40,51 @@ export function useMarkerIcon() {
   }
 
   /**
-   * Generates a "Premium 3D Bubble" marker SVG.
-   * Style: Glossy, Gradient, Thick White Border, Drop Shadow.
+   * Generates a "Flat Modern" marker SVG.
+   * Style: Clean, Matte, Minimal Shadow, Teardrop shape.
    */
   function getPinSvg(category: string | null | undefined, scale: number = 1): string {
     const color = getCategoryColor(category)
     const iconPath = icons[category || 'other'] || icons.other
     
-    // Unique ID for gradients to avoid conflicts if multiple markers are rendered (though purely string based here)
-    // We'll use the color hex as part of the ID since it's unique per category type usually.
-    const cleanColor = color.replace('#', '')
-    const gradId = `g-${cleanColor}`
-    
-    // Bubble Shape: Circle centered at 18,18 radius 15. Tail pointing to 18,46.
-    const bubblePath = `
-      M 18,46
-      C 18,46 4,32 4,18
+    // Modern Teardrop Shape:
+    // Centered horizontally at 18.
+    // Top circle: Center 18,18 Radius 14.
+    // Tail tip: 18, 44.
+    const pinPath = `
+      M 18,44
+      C 18,44 4,28 4,18
       A 14,14 0 1,1 32,18
-      C 32,32 18,46 18,46 Z
+      C 32,28 18,44 18,44 Z
     `
 
-    // We use a radial gradient to simulate 3D sphere look
-    // Center is slightly top-left to look like light source
-    const gradientDef = `
-      <radialGradient id="${gradId}" cx="35%" cy="35%" r="65%">
-        <stop offset="0%" stop-color="white" stop-opacity="0.4" />
-        <stop offset="100%" stop-color="${color}" stop-opacity="0" />
-      </radialGradient>
-      <linearGradient id="main-${gradId}" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="${color}" />
-        <stop offset="100%" stop-color="${adjustBrightness(color, -40)}" />
-      </linearGradient>
-    `
-
-    // We need a viewbox that includes space for the drop shadow and border stroke
-    // Path bounds: x [4..32], y [4..46]. 
-    // Add margin for stroke (2.5) and shadow (dy=3, blur~6).
-    // Safe ViewBox: x[-5..41] (width 46), y[-5..55] (height 60).
-    const viewBox = "-5 -5 46 60"
-    const width = 46 * scale
-    const height = 60 * scale
-
+    // ViewBox: 0 0 36 48 (standard size)
+    // We add a small drop shadow via filter, so we might need slightly larger viewBox if we strictly clip,
+    // but usually standard SVG overflow is visible if not clipped.
+    // Let's keep 36x48 and use a simple shadow.
+    
     const svg = `
-      <svg width="${width}" height="${height}" viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="shadow-lg" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.3"/>
-          </filter>
-          ${gradientDef}
-        </defs>
+      <svg width="${36 * scale}" height="${48 * scale}" viewBox="0 0 36 48" xmlns="http://www.w3.org/2000/svg">
+        <filter id="shadow-sm" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#000000" flood-opacity="0.2"/>
+        </filter>
         
-        <!-- Drop Shadow Group -->
-        <g filter="url(#shadow-lg)">
-          <!-- Main Body with Linear Gradient basis -->
-          <path d="${bubblePath}" fill="url(#main-${gradId})" stroke="white" stroke-width="2.5" />
-        </g>
+        <!-- Drop Shadow -->
+        <path d="${pinPath}" fill="black" filter="url(#shadow-sm)" stroke="none" transform="translate(0, 1)" />
 
-        <!-- Glossy Highlight Overlay -->
-        <path d="${bubblePath}" fill="url(#${gradId})" style="mix-blend-mode: overlay;" pointer-events="none" />
-        
-        <!-- Top Reflection (Glass effect) -->
-        <ellipse cx="18" cy="12" rx="8" ry="4" fill="white" fill-opacity="0.3" pointer-events="none" />
+        <!-- Main Body (Flat Color) -->
+        <path d="${pinPath}" fill="${color}" stroke="white" stroke-width="1.5" />
 
         <!-- Inner Icon (White, centered) -->
-        <g transform="translate(9.5, 9.5) scale(0.7)">
-          <path d="${iconPath}" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.2));" />
+        <!-- Center of circle is 18,18. Icon is 24x24. -->
+        <!-- Scale 0.65 -> 15.6 size. Offset: 18 - 7.8 = 10.2 -->
+        <g transform="translate(10.2, 10.2) scale(0.65)">
+          <path d="${iconPath}" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
         </g>
       </svg>
     `
     // Minify whitespace
     return svg.replace(/\s+/g, ' ').trim()
-  }
-
-  /**
-   * Helper to darken hex color for gradient
-   */
-  function adjustBrightness(hex: string, percent: number) {
-    let num = parseInt(hex.replace('#',''), 16)
-    let amt = Math.round(2.55 * percent)
-    let R = (num >> 16) + amt
-    let B = ((num >> 8) & 0x00FF) + amt
-    let G = (num & 0x0000FF) + amt
-    return '#' + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (B<255?B<1?0:B:255)*0x100 + (G<255?G<1?0:G:255)).toString(16).slice(1)
   }
 
   /**
@@ -138,13 +101,11 @@ export function useMarkerIcon() {
     getPinSvg,
     getPinDataUrl,
     // Export dimensions so consumers can align anchors correctly
-    pinAnchor: { x: 18 + 5, y: 46 + 5 }, // Account for viewBox offset (-5, -5) -> CenterX 18 becomes 23, TipY 46 becomes 51?
-    // Wait, if ViewBox starts at -5, then 0 is at 5px from left edge.
-    // The coordinate 18 is at 18 - (-5) = 23px from left edge.
-    // The coordinate 46 is at 46 - (-5) = 51px from top edge.
-    // So visual center is 23, 51.
-    anchorPoint: { x: 23, y: 51 },
-    size: { width: 46, height: 60 }
+    // Flat design is standard 36x48
+    pinAnchor: { x: 18, y: 44 }, // Tip of the tail
+    size: { width: 36, height: 48 },
+    anchorPoint: { x: 18, y: 44 } // Duplicate for compat
   }
 }
+
 

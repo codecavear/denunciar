@@ -30,7 +30,7 @@
     "closed": "Cerrado"
   },
   "map": {
-    "legend": "Estado",
+    "legend": "Leyenda",
     "clickToReport": "Haz clic en el mapa para reportar",
     "reportIssue": "Reportar Problema",
     "reportedBy": "Reportado por",
@@ -41,7 +41,19 @@
     "confirmIssue": "Confirmar Problema",
     "confirmed": "Confirmado",
     "markResolved": "Marcar Resuelto",
-    "issueMarkedResolved": "Problema marcado como resuelto"
+    "issueMarkedResolved": "Problema marcado como resuelto",
+    "filterByType": "Filtrar por Tipo",
+    "status": "Estado"
+  },
+  "category": {
+    "pothole": "Bache",
+    "trash": "Basura",
+    "lighting": "Alumbrado",
+    "security": "Seguridad",
+    "trees": "Arbolado",
+    "water": "Agua",
+    "infrastructure": "Infraestructura",
+    "other": "Otro"
   },
   "issue": {
     "reportAnIssue": "Reportar un Problema",

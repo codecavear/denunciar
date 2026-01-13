@@ -45,18 +45,19 @@ const statusOptions = [
     </div>
 
     <div class="mb-6">
-      <UButtonGroup>
+      <div class="flex flex-wrap gap-2">
         <UButton
           v-for="opt in statusOptions"
           :key="opt.value || 'all'"
           :color="statusFilter === opt.value ? 'primary' : 'neutral'"
-          :variant="statusFilter === opt.value ? 'solid' : 'outline'"
+          :variant="statusFilter === opt.value ? 'soft' : 'ghost'"
           size="sm"
+          class="rounded-full px-4"
           @click="statusFilter = opt.value"
         >
           {{ opt.label }}
         </UButton>
-      </UButtonGroup>
+      </div>
     </div>
 
     <div v-if="status === 'pending'" class="flex justify-center py-12">
