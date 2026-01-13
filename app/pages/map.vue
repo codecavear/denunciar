@@ -362,7 +362,7 @@ async function openCreateModal() {
     >
       <div
         v-if="selectedIssue"
-        class="absolute top-0 right-0 bottom-0 w-full max-w-md bg-white dark:bg-gray-900 shadow-xl z-40 overflow-y-auto"
+        class="absolute top-0 right-0 bottom-0 w-full max-w-md bg-default shadow-xl z-40 overflow-y-auto ring ring-default"
       >
         <!-- Header image -->
         <div class="relative">
@@ -372,10 +372,10 @@ async function openCreateModal() {
             :alt="selectedIssue.title"
             class="w-full h-48 object-cover"
           >
-          <div v-else class="w-full h-32 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+          <div v-else class="w-full h-32 bg-elevated flex items-center justify-center">
             <UIcon
               :name="selectedIssue.entity?.icon || 'i-lucide-alert-circle'"
-              class="w-12 h-12 text-gray-400"
+              class="w-12 h-12 text-muted"
             />
           </div>
 
@@ -385,7 +385,7 @@ async function openCreateModal() {
             variant="solid"
             size="sm"
             class="absolute top-3 right-3 z-10"
-            @click.stop="closePanel"
+            @click="closePanel"
           />
         </div>
 
@@ -393,40 +393,40 @@ async function openCreateModal() {
           <!-- Title and status -->
           <div>
             <div class="flex items-start justify-between gap-2">
-              <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+              <h2 class="text-xl font-semibold text-highlighted">
                 {{ selectedIssue.title }}
               </h2>
               <UBadge :color="selectedIssue.status === 'pending' ? 'warning' : selectedIssue.status === 'in_progress' ? 'info' : 'success'" variant="subtle">
                 {{ statusLabels[selectedIssue.status] }}
               </UBadge>
             </div>
-            <p class="text-sm text-gray-500 mt-1">
+            <p class="text-sm text-muted mt-1">
               {{ t('map.reportedBy') }} {{ selectedIssue.user?.name || t('map.anonymous') }} {{ t('map.on') }} {{ formatDate(selectedIssue.createdAt) }}
             </p>
           </div>
 
           <!-- Description -->
-          <p class="text-gray-700 dark:text-gray-300">
+          <p class="text-default">
             {{ selectedIssue.description }}
           </p>
 
           <!-- Details -->
           <div class="space-y-2 text-sm">
-            <div v-if="selectedIssue.entity" class="flex items-center gap-2 text-gray-500">
+            <div v-if="selectedIssue.entity" class="flex items-center gap-2 text-muted">
               <UIcon :name="selectedIssue.entity.icon || 'i-lucide-building-2'" class="w-4 h-4" />
               <span>{{ selectedIssue.entity.name }}</span>
             </div>
-            <div v-if="selectedIssue.address" class="flex items-center gap-2 text-gray-500">
+            <div v-if="selectedIssue.address" class="flex items-center gap-2 text-muted">
               <UIcon name="i-lucide-map-pin" class="w-4 h-4" />
               <span>{{ selectedIssue.address }}</span>
             </div>
           </div>
 
           <!-- Confirmation count -->
-          <div class="flex items-center gap-2 py-3 border-t border-b border-gray-200 dark:border-gray-700">
-            <UIcon name="i-lucide-users" class="w-5 h-5 text-gray-400" />
-            <span class="text-gray-600 dark:text-gray-400">
-              <strong class="text-gray-900 dark:text-white">{{ selectedIssue.confirmationCount }}</strong>
+          <div class="flex items-center gap-2 py-3 border-y border-default">
+            <UIcon name="i-lucide-users" class="w-5 h-5 text-muted" />
+            <span class="text-muted">
+              <strong class="text-highlighted">{{ selectedIssue.confirmationCount }}</strong>
               {{ selectedIssue.confirmationCount === 1 ? t('map.personConfirmed') : t('map.peopleConfirmed') }}
             </span>
           </div>
