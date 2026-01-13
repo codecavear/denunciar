@@ -26,12 +26,6 @@ const isMapLoaded = ref(false)
 
 const selectedIssue = ref<PublicIssue | null>(null)
 const isConfirming = ref(false)
-const isSlideoverOpen = computed({
-  get: () => !!selectedIssue.value,
-  set: (value) => {
-    if (!value) selectedIssue.value = null
-  }
-})
 
 const { data: issues, refresh: refreshIssues } = await useFetch<PublicIssue[]>('/api/issues/public')
 const { data: myConfirmations, refresh: refreshConfirmations } = await useFetch<string[]>('/api/issues/my-confirmations')
@@ -301,6 +295,10 @@ async function deleteIssue(issue: PublicIssue) {
   }
 }
 
+function closePanel() {
+  selectedIssue.value = null
+}
+
 function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString('en-US', {
     month: 'short',
@@ -355,51 +353,57 @@ async function openCreateModal() {
       </UButton>
     </div>
 
-    <!-- Issue detail slideover -->
-    <USlideover
-      v-model:open="isSlideoverOpen"
-      :title="selectedIssue?.title"
-      :ui="{ content: 'max-w-md' }"
+    <!-- Issue detail panel -->
+    <Transition
+      enter-active-class="transition-transform duration-300 ease-out"
+      leave-active-class="transition-transform duration-200 ease-in"
+      enter-from-class="translate-x-full"
+      leave-to-class="translate-x-full"
     >
-      <span class="hidden" />
-
-      <template #header>
-        <div v-if="selectedIssue" class="flex items-start justify-between gap-2 w-full">
-          <h2 class="text-lg font-semibold text-highlighted truncate">
-            {{ selectedIssue.title }}
-          </h2>
-          <UBadge
-            :color="selectedIssue.status === 'pending' ? 'warning' : selectedIssue.status === 'in_progress' ? 'info' : selectedIssue.status === 'resolved' ? 'success' : 'neutral'"
-            variant="subtle"
-            class="shrink-0"
+      <div
+        v-if="selectedIssue"
+        class="absolute top-0 right-0 bottom-0 w-full max-w-md bg-default shadow-xl z-40 overflow-y-auto ring ring-default"
+      >
+        <!-- Header image -->
+        <div class="relative">
+          <img
+            v-if="selectedIssue.imageUrl"
+            :src="selectedIssue.imageUrl"
+            :alt="selectedIssue.title"
+            class="w-full h-48 object-cover"
           >
-            {{ statusLabels[selectedIssue.status] }}
-          </UBadge>
-        </div>
-      </template>
-
-      <template #body>
-        <div v-if="selectedIssue" class="space-y-4">
-          <!-- Image -->
-          <div class="-mx-4 sm:-mx-6 -mt-4 sm:-mt-6">
-            <img
-              v-if="selectedIssue.imageUrl"
-              :src="selectedIssue.imageUrl"
-              :alt="selectedIssue.title"
-              class="w-full h-48 object-cover"
-            >
-            <div v-else class="w-full h-32 bg-elevated flex items-center justify-center">
-              <UIcon
-                :name="selectedIssue.entity?.icon || 'i-lucide-alert-circle'"
-                class="w-12 h-12 text-muted"
-              />
-            </div>
+          <div v-else class="w-full h-32 bg-elevated flex items-center justify-center">
+            <UIcon
+              :name="selectedIssue.entity?.icon || 'i-lucide-alert-circle'"
+              class="w-12 h-12 text-muted"
+            />
           </div>
 
-          <!-- Reporter info -->
-          <p class="text-sm text-muted">
-            {{ t('map.reportedBy') }} {{ selectedIssue.user?.name || t('map.anonymous') }} {{ t('map.on') }} {{ formatDate(selectedIssue.createdAt) }}
-          </p>
+          <UButton
+            icon="i-lucide-x"
+            color="neutral"
+            variant="solid"
+            size="sm"
+            class="absolute top-3 right-3 z-10"
+            @click="closePanel"
+          />
+        </div>
+
+        <div class="p-4 space-y-4">
+          <!-- Title and status -->
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <h2 class="text-xl font-semibold text-highlighted">
+                {{ selectedIssue.title }}
+              </h2>
+              <UBadge :color="selectedIssue.status === 'pending' ? 'warning' : selectedIssue.status === 'in_progress' ? 'info' : 'success'" variant="subtle">
+                {{ statusLabels[selectedIssue.status] }}
+              </UBadge>
+            </div>
+            <p class="text-sm text-muted mt-1">
+              {{ t('map.reportedBy') }} {{ selectedIssue.user?.name || t('map.anonymous') }} {{ t('map.on') }} {{ formatDate(selectedIssue.createdAt) }}
+            </p>
+          </div>
 
           <!-- Description -->
           <p class="text-default">
@@ -426,43 +430,42 @@ async function openCreateModal() {
               {{ selectedIssue.confirmationCount === 1 ? t('map.personConfirmed') : t('map.peopleConfirmed') }}
             </span>
           </div>
+
+          <!-- Actions -->
+          <div class="flex gap-2">
+            <UButton
+              v-if="!isOwner(selectedIssue)"
+              :color="hasConfirmed(selectedIssue) ? 'success' : 'neutral'"
+              :variant="hasConfirmed(selectedIssue) ? 'solid' : 'outline'"
+              :loading="isConfirming"
+              class="flex-1"
+              @click="toggleConfirm(selectedIssue)"
+            >
+              <UIcon :name="hasConfirmed(selectedIssue) ? 'i-lucide-check' : 'i-lucide-thumbs-up'" class="w-4 h-4 mr-1" />
+              {{ hasConfirmed(selectedIssue) ? t('map.confirmed') : t('map.confirmIssue') }}
+            </UButton>
+
+            <UButton
+              v-if="isOwner(selectedIssue) && selectedIssue.status !== 'resolved'"
+              color="success"
+              class="flex-1"
+              @click="markResolved(selectedIssue)"
+            >
+              <UIcon name="i-lucide-check-circle" class="w-4 h-4 mr-1" />
+              {{ t('map.markResolved') }}
+            </UButton>
+
+            <UButton
+              v-if="isOwner(selectedIssue)"
+              color="error"
+              variant="outline"
+              icon="i-lucide-trash-2"
+              @click="deleteIssue(selectedIssue)"
+            />
+          </div>
         </div>
-      </template>
-
-      <template #footer>
-        <div v-if="selectedIssue" class="flex gap-2 w-full">
-          <UButton
-            v-if="!isOwner(selectedIssue)"
-            :color="hasConfirmed(selectedIssue) ? 'success' : 'neutral'"
-            :variant="hasConfirmed(selectedIssue) ? 'solid' : 'outline'"
-            :loading="isConfirming"
-            class="flex-1"
-            @click="toggleConfirm(selectedIssue)"
-          >
-            <UIcon :name="hasConfirmed(selectedIssue) ? 'i-lucide-check' : 'i-lucide-thumbs-up'" class="w-4 h-4 mr-1" />
-            {{ hasConfirmed(selectedIssue) ? t('map.confirmed') : t('map.confirmIssue') }}
-          </UButton>
-
-          <UButton
-            v-if="isOwner(selectedIssue) && selectedIssue.status !== 'resolved'"
-            color="success"
-            class="flex-1"
-            @click="markResolved(selectedIssue)"
-          >
-            <UIcon name="i-lucide-check-circle" class="w-4 h-4 mr-1" />
-            {{ t('map.markResolved') }}
-          </UButton>
-
-          <UButton
-            v-if="isOwner(selectedIssue)"
-            color="error"
-            variant="outline"
-            icon="i-lucide-trash-2"
-            @click="deleteIssue(selectedIssue)"
-          />
-        </div>
-      </template>
-    </USlideover>
+      </div>
+    </Transition>
 
   </div>
 </template>
