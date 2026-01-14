@@ -28,6 +28,9 @@ const isMapLoaded = ref(false)
 
 const selectedIssue = ref<PublicIssue | null>(null)
 const isConfirming = ref(false)
+const userLocationMarker = shallowRef<google.maps.marker.AdvancedMarkerElement | google.maps.Marker | null>(null)
+const userLocationCircle = shallowRef<google.maps.Circle | null>(null)
+const userLocation = ref<{ lat: number; lng: number } | null>(null)
 
 const { data: issues, refresh: refreshIssues } = await useFetch<PublicIssue[]>('/api/issues/public')
 const { data: myConfirmations, refresh: refreshConfirmations } = await useFetch<string[]>('/api/issues/my-confirmations')
@@ -65,6 +68,68 @@ function getCategoryIcon(category: string | null | undefined): string {
 }
 
 const { load: loadGoogleMaps } = useGoogleMaps()
+
+function createUserLocationMarker() {
+  if (!map.value || !userLocation.value) return
+
+  // Remove existing marker and circle
+  if (userLocationMarker.value) {
+    if (typeof (userLocationMarker.value as any).setMap === 'function') {
+      (userLocationMarker.value as any).setMap(null)
+    }
+    userLocationMarker.value = null
+  }
+  if (userLocationCircle.value) {
+    userLocationCircle.value.setMap(null)
+    userLocationCircle.value = null
+  }
+
+  // Create pulsing circle using Google Maps Circle
+  userLocationCircle.value = new google.maps.Circle({
+    center: userLocation.value,
+    radius: 10,
+    map: map.value,
+    fillColor: '#60A5FA',
+    fillOpacity: 0.2,
+    strokeColor: '#60A5FA',
+    strokeOpacity: 0.3,
+    strokeWeight: 1.5
+  })
+
+  // Radar/sonar pulse animation - expand and fade out, then reset
+  let radius = 10
+  let opacity = 0.2
+  setInterval(() => {
+    if (!userLocationCircle.value) return
+    radius += 0.6
+    opacity -= 0.005
+    if (radius >= 45) {
+      radius = 10
+      opacity = 0.2
+    }
+    userLocationCircle.value.setRadius(radius)
+    userLocationCircle.value.setOptions({
+      fillOpacity: Math.max(0, opacity),
+      strokeOpacity: Math.max(0, opacity * 1.2)
+    })
+  }, 40)
+
+  // Center dot marker
+  userLocationMarker.value = new google.maps.Marker({
+    position: userLocation.value,
+    map: map.value,
+    title: 'Tu ubicación',
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      scale: 8,
+      fillColor: '#4285F4',
+      fillOpacity: 1,
+      strokeColor: 'white',
+      strokeWeight: 3
+    },
+    zIndex: 999
+  })
+}
 
 onMounted(async () => {
   if (!config.public.googleMapsApiKey) {
@@ -111,12 +176,17 @@ async function initMap() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        map.value?.setCenter({
+        const pos = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
-        })
+        }
+        userLocation.value = pos
+        map.value?.setCenter(pos)
+        createUserLocationMarker()
       },
-      () => {}
+      () => {
+        // User denied location - don't show marker
+      }
     )
   }
 }
@@ -160,11 +230,14 @@ function centerMap() {
 
   navigator.geolocation.getCurrentPosition(
     (position) => {
-      map.value?.setCenter({
+      const pos = {
         lat: position.coords.latitude,
         lng: position.coords.longitude
-      })
+      }
+      userLocation.value = pos
+      map.value?.setCenter(pos)
       map.value?.setZoom(16)
+      createUserLocationMarker()
     },
     (error) => {
       console.error('Error getting location', error)
