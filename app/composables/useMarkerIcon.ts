@@ -46,40 +46,32 @@ export function useMarkerIcon() {
   }
 
   /**
-   * Generates a "Flat Modern" marker SVG.
-   * Color now depends on STATUS.
-   * Icon depends on CATEGORY.
+   * Generates a circular marker with category-colored background,
+   * white icon, and small status indicator dot.
    */
   function getPinSvg(category: string | null | undefined, status: string | null | undefined, scale: number = 1): string {
-    const color = getStatusColor(status)
+    const bgColor = categoryColors[category || 'other'] || categoryColors.other
+    const statusColor = getStatusColor(status)
     const iconPath = icons[category || 'other'] || icons.other
-    
-    // Modern Teardrop Shape
-    const pinPath = `
-      M 18,44
-      C 18,44 4,28 4,18
-      A 14,14 0 1,1 32,18
-      C 32,28 18,44 18,44 Z
-    `
-    // Slightly darken stroke or keep white
-    const strokeColor = 'white' 
 
     const svg = `
-      <svg width="${36 * scale}" height="${48 * scale}" viewBox="0 0 36 48" xmlns="http://www.w3.org/2000/svg">
-        <filter id="shadow-sm" x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#000000" flood-opacity="0.2"/>
-        </filter>
-        
-        <!-- Drop Shadow -->
-        <path d="${pinPath}" fill="black" filter="url(#shadow-sm)" stroke="none" transform="translate(0, 1)" />
+      <svg width="${36 * scale}" height="${36 * scale}" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.3"/>
+          </filter>
+        </defs>
 
-        <!-- Main Body (Status Color) -->
-        <path d="${pinPath}" fill="${color}" stroke="${strokeColor}" stroke-width="1.5" />
+        <!-- Main Circle (Category Color) -->
+        <circle cx="16" cy="18" r="14" fill="${bgColor}" stroke="white" stroke-width="2" filter="url(#shadow)" />
 
-        <!-- Inner Icon (White, centered) -->
-        <g transform="translate(10.2, 10.2) scale(0.65)">
+        <!-- Icon (White) -->
+        <g transform="translate(9, 11) scale(0.6)">
           <path d="${iconPath}" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
         </g>
+
+        <!-- Status Indicator Dot -->
+        <circle cx="28" cy="8" r="7" fill="${statusColor}" stroke="white" stroke-width="2" />
       </svg>
     `
     return svg.replace(/\s+/g, ' ').trim()
@@ -109,9 +101,9 @@ export function useMarkerIcon() {
     getCategoryColor,
     getPinSvg,
     getPinDataUrl,
-    pinAnchor: { x: 18, y: 44 },
-    size: { width: 36, height: 48 },
-    anchorPoint: { x: 18, y: 44 }
+    pinAnchor: { x: 16, y: 18 },
+    size: { width: 36, height: 36 },
+    anchorPoint: { x: 16, y: 18 }
   }
 }
 
