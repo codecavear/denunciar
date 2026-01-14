@@ -2,7 +2,7 @@
 import { LazyAuthLoginModal } from '#components'
 
 const { t, locale, locales, setLocale } = useI18n()
-const { loggedIn } = useUserSession()
+const { loggedIn, user, clear } = useUserSession()
 const overlay = useOverlay()
 const loginModal = overlay.create(LazyAuthLoginModal)
 
@@ -13,8 +13,31 @@ const localeItems = computed(() => {
   }))
 })
 
+const profileItems = computed(() => [
+  [{
+    label: t('nav.myReports'),
+    icon: 'i-lucide-file-text',
+    to: '/mis-denuncias'
+  },
+  {
+    label: t('nav.profile'),
+    icon: 'i-lucide-user',
+    to: '/profile'
+  }],
+  [{
+    label: t('nav.logout'),
+    icon: 'i-lucide-log-out',
+    onSelect: logout
+  }]
+])
+
 async function openLogin() {
   await loginModal.open({}).result
+}
+
+async function logout() {
+  await clear()
+  navigateTo('/')
 }
 </script>
 
@@ -46,14 +69,14 @@ async function openLogin() {
 
           <UColorModeButton />
 
-          <UButton
-            v-if="loggedIn"
-            icon="i-lucide-layout-dashboard"
-            color="neutral"
-            variant="ghost"
-            size="sm"
-            to="/dashboard"
-          />
+          <UDropdownMenu v-if="loggedIn" :items="profileItems">
+            <UAvatar
+              :src="user?.avatarUrl"
+              :alt="user?.name"
+              size="sm"
+              class="cursor-pointer"
+            />
+          </UDropdownMenu>
 
           <UButton
             v-if="!loggedIn"

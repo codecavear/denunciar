@@ -13,7 +13,15 @@
       "Bash(curl:*)",
       "Bash(bun typecheck:*)",
       "Bash(bunx nuxi prepare:*)",
-      "Bash(git add -A)"
+      "Bash(git add -A)",
+      "mcp__nuxt-ui-remote__list-components",
+      "mcp__nuxt-ui-remote__list-composables",
+      "mcp__nuxt-remote__get-getting-started-guide",
+      "mcp__nuxt-ui-remote__get-component",
+      "mcp__nuxt-ui-remote__get-component-metadata",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)"
     ]
   }
 }

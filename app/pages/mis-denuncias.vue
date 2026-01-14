@@ -5,6 +5,7 @@ definePageMeta({
   middleware: 'auth'
 })
 
+const { t } = useI18n()
 const { data: issues, refresh, status } = await useFetch<Array<Issue & { entity: Entity | null }>>('/api/issues')
 
 const statusFilter = ref<string>()
@@ -15,13 +16,13 @@ const filteredIssues = computed(() => {
   return issues.value.filter(i => i.status === statusFilter.value)
 })
 
-const statusOptions = [
-  { label: 'All', value: undefined },
-  { label: 'Pending', value: 'pending' },
-  { label: 'In Progress', value: 'in_progress' },
-  { label: 'Resolved', value: 'resolved' },
-  { label: 'Closed', value: 'closed' }
-]
+const statusOptions = computed(() => [
+  { label: t('dashboard.all'), value: undefined },
+  { label: t('status.pending'), value: 'pending' },
+  { label: t('status.in_progress'), value: 'in_progress' },
+  { label: t('status.resolved'), value: 'resolved' },
+  { label: t('status.closed'), value: 'closed' }
+])
 </script>
 
 <template>
@@ -29,10 +30,10 @@ const statusOptions = [
     <div class="flex items-center justify-between mb-8">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-          My Reports
+          {{ t('dashboard.title') }}
         </h1>
         <p class="text-gray-500 mt-1">
-          Track and manage your issue reports
+          {{ t('dashboard.subtitle') }}
         </p>
       </div>
       <UButton
@@ -40,7 +41,7 @@ const statusOptions = [
         icon="i-lucide-plus"
         color="primary"
       >
-        New Report
+        {{ t('dashboard.newReport') }}
       </UButton>
     </div>
 
@@ -67,10 +68,10 @@ const statusOptions = [
     <div v-else-if="!filteredIssues.length" class="text-center py-12">
       <UIcon name="i-lucide-inbox" class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600" />
       <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">
-        No reports yet
+        {{ t('dashboard.noReports') }}
       </h3>
       <p class="mt-2 text-gray-500">
-        Start by creating your first issue report
+        {{ t('dashboard.noReportsDescription') }}
       </p>
       <UButton
         to="/issues/new"
@@ -78,11 +79,11 @@ const statusOptions = [
         color="primary"
         class="mt-4"
       >
-        Create Report
+        {{ t('dashboard.createReport') }}
       </UButton>
     </div>
 
-    <div v-else class="space-y-4">
+    <div v-else class="flex flex-col gap-4">
       <IssueCard
         v-for="issue in filteredIssues"
         :key="issue.id"

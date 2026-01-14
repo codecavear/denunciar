@@ -6,9 +6,12 @@
     "agreementText": "Al iniciar sesion, aceptas nuestros Terminos de Servicio."
   },
   "nav": {
-    "dashboard": "Mis Reportes",
-    "newIssue": "Reportar Problema",
-    "getStarted": "Comenzar"
+    "dashboard": "Mis Denuncias",
+    "newIssue": "Nueva Denuncia",
+    "getStarted": "Comenzar",
+    "myReports": "Mis denuncias",
+    "profile": "Perfil",
+    "logout": "Cerrar sesion"
   },
   "common": {
     "cancel": "Cancelar",
@@ -29,20 +32,29 @@
     "resolved": "Resuelto",
     "closed": "Cerrado"
   },
+  "dashboard": {
+    "title": "Mis Denuncias",
+    "subtitle": "Rastrea y gestiona tus denuncias",
+    "all": "Todas",
+    "newReport": "Nueva Denuncia",
+    "noReports": "Sin denuncias",
+    "noReportsDescription": "Comienza creando tu primera denuncia",
+    "createReport": "Crear Denuncia"
+  },
   "map": {
     "legend": "Leyenda",
-    "clickToReport": "Haz clic en el mapa para reportar",
-    "reportIssue": "Reportar Problema",
+    "clickToReport": "Haz clic en el mapa para denunciar",
+    "reportIssue": "Nueva Denuncia",
     "createReport": "Crear denuncia",
-    "reportedBy": "Reportado por",
+    "reportedBy": "Denunciado por",
     "anonymous": "Anonimo",
     "on": "el",
-    "peopleConfirmed": "personas confirmaron este problema",
-    "personConfirmed": "persona confirmo este problema",
-    "confirmIssue": "Confirmar Problema",
+    "peopleConfirmed": "personas confirmaron esta denuncia",
+    "personConfirmed": "persona confirmo esta denuncia",
+    "confirmIssue": "Confirmar Denuncia",
     "confirmed": "Confirmado",
     "markResolved": "Marcar Resuelto",
-    "issueMarkedResolved": "Problema marcado como resuelto",
+    "issueMarkedResolved": "Denuncia marcada como resuelta",
     "filters": "Filtros",
     "view": "Vista",
     "type": "Tipo",
@@ -84,24 +96,24 @@
     "other": "Otro"
   },
   "issue": {
-    "reportAnIssue": "Reportar un Problema",
+    "reportAnIssue": "Crear Denuncia",
     "helpCommunity": "Ayuda a mejorar tu comunidad reportando problemas",
     "photo": "Foto",
     "title": "Titulo",
-    "titlePlaceholder": "Titulo breve del problema",
+    "titlePlaceholder": "Titulo breve de la denuncia",
     "description": "Descripcion",
     "descriptionPlaceholder": "Describe el problema en detalle...",
     "location": "Ubicacion",
     "department": "Departamento",
     "category": "Categoría",
-    "submitReport": "Enviar Reporte",
-    "reportCreated": "Reporte creado exitosamente",
-    "reportFailed": "Error al crear el reporte",
+    "submitReport": "Enviar Denuncia",
+    "reportCreated": "Denuncia creada exitosamente",
+    "reportFailed": "Error al crear la denuncia",
     "fillRequired": "Por favor completa el titulo y la descripcion",
-    "confirmFailed": "Error al confirmar el problema",
-    "issueDeleted": "Problema eliminado",
-    "deleteFailed": "Error al eliminar el problema",
-    "notFound": "Problema no encontrado",
+    "confirmFailed": "Error al confirmar la denuncia",
+    "issueDeleted": "Denuncia eliminada",
+    "deleteFailed": "Error al eliminar la denuncia",
+    "notFound": "Denuncia no encontrada",
     "created": "Creado",
     "aiConfidence": "Confianza de IA",
     "changesSaved": "Cambios guardados",
@@ -109,7 +121,7 @@
   },
   "entities": {
     "title": "Departamentos Gubernamentales",
-    "subtitle": "Administra los departamentos que gestionan los reportes",
+    "subtitle": "Administra los departamentos que gestionan las denuncias",
     "addDepartment": "Agregar Departamento",
     "editDepartment": "Editar Departamento",
     "newDepartment": "Nuevo Departamento",
@@ -131,38 +143,38 @@
     "nameRequired": "El nombre es requerido"
   },
   "home": {
-    "title": "Reporta Problemas en Tu ",
+    "title": "Denuncia Problemas en Tu ",
     "titleHighlight": "Comunidad",
-    "description": "Reporta facilmente problemas en tu vecindario - baches, luces rotas, fugas de agua y mas. Nuestra IA envia automaticamente tu reporte al departamento correcto.",
+    "description": "Denuncia facilmente problemas en tu vecindario - baches, luces rotas, fugas de agua y mas. Nuestra IA envia automaticamente tu denuncia al departamento correcto.",
     "seo": {
       "title": "Denunciar",
-      "description": "Reporta problemas en tu comunidad y obten soluciones. Enrutamiento automatico con IA a departamentos gubernamentales."
+      "description": "Denuncia problemas en tu comunidad y obten soluciones. Enrutamiento automatico con IA a departamentos gubernamentales."
     },
     "hero": {
-      "getStarted": "Reportar un Problema",
+      "getStarted": "Crear Denuncia",
       "learnMore": "Conocer Mas"
     },
     "howItWorks": {
       "title": "Como Funciona",
-      "description": "Reporta problemas en tres simples pasos",
+      "description": "Denuncia problemas en tres simples pasos",
       "steps": {
         "report": {
-          "title": "1. Reporta",
+          "title": "1. Denuncia",
           "description": "Toma una foto y describe el problema. Agrega la ubicacion usando el mapa o GPS."
         },
         "ai": {
           "title": "2. IA Clasifica",
-          "description": "Nuestra IA analiza tu reporte y automaticamente sugiere el departamento gubernamental correcto."
+          "description": "Nuestra IA analiza tu denuncia y automaticamente sugiere el departamento gubernamental correcto."
         },
         "track": {
           "title": "3. Rastrea",
-          "description": "Monitorea el estado de tu reporte y recibe actualizaciones mientras se resuelve."
+          "description": "Monitorea el estado de tu denuncia y recibe actualizaciones mientras se resuelve."
         }
       }
     },
     "features": {
       "title": "Caracteristicas",
-      "description": "Todo lo que necesitas para reportar y rastrear problemas comunitarios",
+      "description": "Todo lo que necesitas para denunciar y rastrear problemas comunitarios",
       "photo": {
         "title": "Evidencia Fotografica",
         "description": "Sube fotos para documentar claramente el problema y ayudar a los respondedores."
@@ -173,11 +185,11 @@
       },
       "ai": {
         "title": "Clasificacion con IA",
-        "description": "Nuestra IA analiza tu reporte y lo envia automaticamente al departamento apropiado."
+        "description": "Nuestra IA analiza tu denuncia y la envia automaticamente al departamento apropiado."
       },
       "tracking": {
         "title": "Seguimiento de Estado",
-        "description": "Rastrea tus reportes desde el envio hasta la resolucion. Recibe notificaciones de actualizaciones."
+        "description": "Rastrea tus denuncias desde el envio hasta la resolucion. Recibe notificaciones de actualizaciones."
       },
       "multilang": {
         "title": "Multiples Idiomas",
@@ -190,8 +202,8 @@
     },
     "cta": {
       "title": "Listo para Hacer la Diferencia?",
-      "description": "Unete a tu comunidad reportando y resolviendo problemas locales. Cada reporte ayuda a mejorar nuestros vecindarios.",
-      "getStarted": "Comenzar a Reportar"
+      "description": "Unete a tu comunidad denunciando y resolviendo problemas locales. Cada denuncia ayuda a mejorar nuestros vecindarios.",
+      "getStarted": "Comenzar a Denunciar"
     }
   }
 }

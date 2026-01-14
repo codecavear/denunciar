@@ -9,9 +9,23 @@ Use the Nuxt UI MCP tools for accurate component documentation:
 - `mcp__nuxt-ui-remote__get-component` - Get docs for a component
 - `mcp__nuxt-ui-remote__get-component-metadata` - Get props, slots, events
 - `mcp__nuxt-ui-remote__list-components` - Browse all components
+- `mcp__nuxt-remote__get-documentation-page` - Get Nuxt core docs
+- `mcp__nuxt-remote__list-modules` - List Nuxt modules
 
 ### Agents
-- `.claude/agents/frontend.md` - UI development with Nuxt UI 4
+
+**Frontend Agent** (`.claude/agents/frontend.md`)
+Use this agent when working on:
+- Vue `<template>` code in components or pages
+- Nuxt UI component implementation
+- Forms, modals, tables, cards, buttons
+- Styling and layout with Tailwind CSS
+
+The agent includes:
+- Nuxt auto-imports (never manually import Vue/Nuxt APIs)
+- Component naming conventions (`components/issue/Card.vue` → `<IssueCard>`)
+- Nuxt UI 4 component reference with examples
+- Common patterns (empty states, loading, form modals)
 
 ## Tech Stack
 

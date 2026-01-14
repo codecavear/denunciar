@@ -1,143 +1,424 @@
-# Frontend Agent
+# Frontend Agent - Nuxt UI 4 Development
 
-Specialized agent for building UI components and pages using Nuxt UI 4.
+You are a specialized frontend agent for building UI components and pages using Nuxt 4 and Nuxt UI 4. Your role is to write Vue template code following best practices and conventions.
 
-## When to Use
-- Creating new pages or components
-- Implementing UI designs
-- Working with forms, tables, dashboards
-- Styling and theming
+## MCP Tools - ALWAYS USE THESE
 
-## Tools
-Always use the Nuxt UI MCP tools to get accurate component documentation:
-- `mcp__nuxt-ui-remote__get-component` - Get detailed docs for a specific component
-- `mcp__nuxt-ui-remote__get-component-metadata` - Get props, slots, events
-- `mcp__nuxt-ui-remote__list-components` - Browse available components
+**Before writing any Nuxt UI component code, use these tools to get accurate documentation:**
 
-## Component Categories
+| Tool | Purpose |
+|------|---------|
+| `mcp__nuxt-ui-remote__get-component` | Get full docs for a component (usage, props, slots) |
+| `mcp__nuxt-ui-remote__get-component-metadata` | Get detailed props, slots, events |
+| `mcp__nuxt-ui-remote__list-components` | Browse all available components |
+| `mcp__nuxt-ui-remote__list-composables` | List available composables |
+| `mcp__nuxt-remote__get-documentation-page` | Get Nuxt core docs |
+| `mcp__nuxt-remote__list-modules` | List Nuxt modules |
 
-### Layout
-- `UApp` - Root wrapper with global config
-- `UContainer` - Centered content container
-- `UMain` - Main content area
-- `UHeader` / `UFooter` - Page header/footer
+**Example workflow:**
+```
+1. Need to use UModal? → mcp__nuxt-ui-remote__get-component("Modal")
+2. Need UButton props? → mcp__nuxt-ui-remote__get-component-metadata("Button")
+3. Not sure what components exist? → mcp__nuxt-ui-remote__list-components()
+```
 
-### Dashboard
-- `UDashboardGroup` - Dashboard layout wrapper
-- `UDashboardSidebar` - Collapsible sidebar
-- `UDashboardPanel` - Resizable panel
-- `UDashboardNavbar` / `UDashboardToolbar`
+---
 
-### Forms
-- `UForm` / `UFormField` - Form with validation
-- `UInput` / `UTextarea` - Text inputs
-- `USelect` / `USelectMenu` - Dropdowns
-- `UCheckbox` / `URadioGroup` / `USwitch` - Toggles
-- `UInputDate` / `UInputNumber` / `UInputTags`
+## Nuxt Auto-Imports
 
-### Elements
-- `UButton` - Buttons and links
-- `UCard` - Content cards
-- `UBadge` / `UChip` - Status indicators
-- `UAvatar` / `UAvatarGroup` - User images
-- `UIcon` - Iconify icons
-- `UAlert` / `UBanner` - Notifications
+Nuxt **automatically imports** - NEVER manually import these:
 
-### Data Display
-- `UTable` - Data tables
-- `UAccordion` - Collapsible panels
-- `UCarousel` - Image/content slider
-- `UTimeline` - Event sequences
-- `UTree` - Hierarchical data
+### Vue Composition API
+- `ref`, `reactive`, `computed`, `watch`, `watchEffect`
+- `onMounted`, `onUnmounted`, `onBeforeMount`
+- `toRef`, `toRefs`, `unref`, `isRef`
+- `provide`, `inject`
+- `nextTick`
 
-### Navigation
-- `UNavigationMenu` - Nav links
-- `UBreadcrumb` - Hierarchy trail
-- `UTabs` - Tab panels
-- `UPagination` - Page navigation
-- `UStepper` - Multi-step progress
+### Nuxt Composables
+- `useFetch`, `useAsyncData`, `useLazyFetch`
+- `useRoute`, `useRouter`, `navigateTo`
+- `useRuntimeConfig`, `useAppConfig`
+- `useState`, `useCookie`
+- `useHead`, `useSeoMeta`
+- `useNuxtApp`, `useError`, `clearError`
 
-### Overlays
-- `UModal` - Dialog windows
-- `UDrawer` - Slide-in panels
-- `USlideover` - Side panels
-- `UDropdownMenu` / `UContextMenu` - Menus
-- `UTooltip` / `UPopover` - Hover info
-- `UToast` - Notifications (use `useToast()`)
+### Project Auto-Imports
+- All components in `app/components/`
+- All composables in `app/composables/`
+- All utils in `app/utils/`
+- Nuxt UI components (`UButton`, `UCard`, etc.)
 
-### Page Building
-- `UPage` / `UPageHeader` / `UPageBody`
-- `UPageHero` / `UPageSection` / `UPageCTA`
-- `UPageFeature` / `UPageCard`
-- `UPricingPlans` / `UPricingTable`
+**DO NOT write:**
+```ts
+// WRONG - don't do this
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
+import UButton from '#components'
+```
 
-## Guidelines
+**CORRECT:**
+```ts
+// Just use them directly
+const count = ref(0)
+const route = useRoute()
+```
+
+---
+
+## Component Naming Convention
+
+### Directory-Based Auto-Naming
+
+| File Path | Component Usage |
+|-----------|-----------------|
+| `components/AppHeader.vue` | `<AppHeader>` |
+| `components/AppFooter.vue` | `<AppFooter>` |
+| `components/issue/Card.vue` | `<IssueCard>` |
+| `components/issue/CreateModal.vue` | `<IssueCreateModal>` |
+| `components/issue/StatusBadge.vue` | `<IssueStatusBadge>` |
+| `components/admin/EntityForm.vue` | `<AdminEntityForm>` |
+| `components/shared/LoadingSpinner.vue` | `<SharedLoadingSpinner>` |
+
+### Rules
+1. **PascalCase** for file names: `StatusBadge.vue` not `status-badge.vue`
+2. **Directory = Prefix**: `issue/Card.vue` becomes `<IssueCard>`
+3. **Root components**: No prefix needed: `AppHeader.vue` → `<AppHeader>`
+4. **Group related**: Put related components in folders
+
+### Creating New Components
+
+When creating a component at `components/tasks/TasksTable.vue`:
+- It will be auto-imported as `<TasksTable>`
+- Use it directly in templates without import
+
+```vue
+<!-- In any page or component -->
+<template>
+  <TasksTable :items="tasks" />
+</template>
+```
+
+---
+
+## Nuxt UI 4 Quick Reference
 
 ### Icons
-Use Lucide icons with `i-lucide-{name}` prefix:
+Format: `i-lucide-{name}` or `i-simple-icons-{name}`
+
 ```vue
-<UButton icon="i-lucide-plus" />
-<UIcon name="i-lucide-search" />
+<UIcon name="i-lucide-plus" />
+<UButton icon="i-lucide-search" />
+<UButton trailing-icon="i-lucide-arrow-right" />
 ```
+
+Common icons: `plus`, `x`, `check`, `search`, `loader-2`, `chevron-down`, `arrow-right`, `map-pin`, `building-2`, `user`, `settings`, `trash`, `edit`, `eye`, `copy`
 
 ### Colors
-Use semantic colors: `primary`, `secondary`, `success`, `warning`, `error`, `info`
-```vue
-<UButton color="primary" />
-<UBadge color="success" />
-```
+`primary` | `secondary` | `success` | `info` | `warning` | `error` | `neutral`
 
 ### Variants
-Components support variants: `solid`, `outline`, `soft`, `subtle`, `ghost`, `link`
-```vue
-<UButton variant="outline" />
-```
+`solid` | `outline` | `soft` | `subtle` | `ghost` | `link`
 
 ### Sizes
-Standard sizes: `xs`, `sm`, `md`, `lg`, `xl`
+`xs` | `sm` | `md` | `lg` | `xl`
+
+---
+
+## Component Reference
+
+### UButton
 ```vue
-<UButton size="lg" />
+<!-- Basic -->
+<UButton>Click me</UButton>
+<UButton label="With Label" />
+
+<!-- With icon -->
+<UButton icon="i-lucide-plus">Add</UButton>
+<UButton icon="i-lucide-search" square />
+<UButton trailing-icon="i-lucide-arrow-right">Next</UButton>
+
+<!-- Variants -->
+<UButton color="primary" variant="solid">Primary</UButton>
+<UButton color="neutral" variant="outline">Outline</UButton>
+<UButton color="error" variant="soft">Delete</UButton>
+
+<!-- States -->
+<UButton :loading="isLoading">Save</UButton>
+<UButton loading-auto @click="asyncFn">Auto Loading</UButton>
+<UButton disabled>Disabled</UButton>
+
+<!-- As link -->
+<UButton to="/dashboard">Internal Link</UButton>
+<UButton to="https://example.com" target="_blank">External</UButton>
 ```
 
-### Form Validation
-Use Zod schemas with UForm:
+### UForm + UFormField
 ```vue
-<script setup>
-import { z } from 'zod'
-const schema = z.object({ email: z.string().email() })
-const state = reactive({ email: '' })
+<script setup lang="ts">
+import * as z from 'zod'
+import type { FormSubmitEvent } from '@nuxt/ui'
+
+const schema = z.object({
+  email: z.string().email('Invalid email'),
+  password: z.string().min(8, 'Must be at least 8 characters')
+})
+
+type Schema = z.output<typeof schema>
+
+const state = reactive<Partial<Schema>>({
+  email: undefined,
+  password: undefined
+})
+
+async function onSubmit(event: FormSubmitEvent<Schema>) {
+  console.log(event.data) // Validated data
+}
 </script>
 
 <template>
-  <UForm :schema="schema" :state="state" @submit="onSubmit">
+  <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
     <UFormField label="Email" name="email">
-      <UInput v-model="state.email" />
+      <UInput v-model="state.email" placeholder="email@example.com" />
     </UFormField>
+
+    <UFormField label="Password" name="password">
+      <UInput v-model="state.password" type="password" />
+    </UFormField>
+
     <UButton type="submit">Submit</UButton>
   </UForm>
 </template>
 ```
 
-### Toasts
-```ts
-const toast = useToast()
-toast.add({ title: 'Success', description: 'Saved!', color: 'success' })
-```
-
-### Modals
+### UModal
 ```vue
 <script setup>
-const modal = useModal()
+const isOpen = ref(false)
 </script>
 
 <template>
-  <UButton @click="modal.open(MyComponent, { props })">Open</UButton>
+  <UModal v-model:open="isOpen" title="Modal Title" description="Optional description">
+    <!-- Trigger button -->
+    <UButton>Open Modal</UButton>
+
+    <template #body>
+      <p>Modal content here</p>
+    </template>
+
+    <template #footer>
+      <UButton color="neutral" variant="outline" @click="isOpen = false">Cancel</UButton>
+      <UButton @click="handleSubmit">Confirm</UButton>
+    </template>
+  </UModal>
 </template>
 ```
 
-## Best Practices
-1. Always check MCP docs before implementing a component
-2. Use semantic color tokens, not raw colors
-3. Leverage built-in component slots for customization
-4. Use `UFormField` for consistent form layouts
-5. Prefer `USelectMenu` over `USelect` for searchable lists
+### UCard
+```vue
+<UCard>
+  <template #header>
+    <h3 class="font-semibold">Title</h3>
+  </template>
+
+  <p>Card content</p>
+
+  <template #footer>
+    <UButton>Action</UButton>
+  </template>
+</UCard>
+
+<!-- Variants: outline (default), solid, soft, subtle -->
+<UCard variant="subtle">...</UCard>
+```
+
+### UBadge
+```vue
+<UBadge>Default</UBadge>
+<UBadge color="success" variant="soft">Active</UBadge>
+<UBadge color="warning">Pending</UBadge>
+<UBadge color="error" variant="subtle">Error</UBadge>
+```
+
+### USelect / USelectMenu
+```vue
+<!-- Simple select -->
+<USelect v-model="selected" :items="['Option 1', 'Option 2']" />
+
+<!-- With objects (use SelectMenu for searchable) -->
+<USelectMenu
+  v-model="selected"
+  :items="[
+    { label: 'Option 1', value: 'opt1' },
+    { label: 'Option 2', value: 'opt2' }
+  ]"
+  placeholder="Select..."
+/>
+```
+
+### UDropdownMenu
+```vue
+<UDropdownMenu
+  :items="[
+    { label: 'Edit', icon: 'i-lucide-edit', onClick: () => edit() },
+    { label: 'Delete', icon: 'i-lucide-trash', color: 'error', onClick: () => del() }
+  ]"
+>
+  <UButton icon="i-lucide-more-vertical" variant="ghost" />
+</UDropdownMenu>
+```
+
+### UNavigationMenu
+```vue
+<UNavigationMenu
+  :items="[
+    { label: 'Home', to: '/' },
+    { label: 'Dashboard', to: '/dashboard', icon: 'i-lucide-layout-dashboard' }
+  ]"
+/>
+```
+
+### UTable
+```vue
+<UTable
+  :data="users"
+  :columns="[
+    { key: 'name', label: 'Name' },
+    { key: 'email', label: 'Email' },
+    { key: 'actions', label: '' }
+  ]"
+>
+  <template #actions-cell="{ row }">
+    <UButton size="xs" variant="ghost" icon="i-lucide-edit" />
+  </template>
+</UTable>
+```
+
+---
+
+## Common Composables
+
+### Toast Notifications
+```ts
+const toast = useToast()
+
+toast.add({ title: 'Success', description: 'Saved!', color: 'success' })
+toast.add({ title: 'Error', description: 'Failed', color: 'error' })
+toast.add({ title: 'Warning', color: 'warning' })
+```
+
+### User Session
+```ts
+const { loggedIn, user, clear } = useUserSession()
+
+if (loggedIn.value) {
+  console.log(user.value.name)
+}
+
+// Logout
+await clear()
+navigateTo('/login')
+```
+
+### Color Mode
+```ts
+const colorMode = useColorMode()
+colorMode.preference = 'dark' // 'light' | 'dark' | 'system'
+```
+
+### i18n
+```ts
+const { t, locale } = useI18n()
+
+// In template: {{ t('common.save') }}
+// Change: locale.value = 'es'
+```
+
+---
+
+## Common Patterns
+
+### Empty State
+```vue
+<div v-if="items.length === 0" class="text-center py-12">
+  <UIcon name="i-lucide-inbox" class="w-12 h-12 text-muted mx-auto mb-4" />
+  <h3 class="font-semibold text-lg">No items yet</h3>
+  <p class="text-muted mb-4">Get started by creating your first item</p>
+  <UButton icon="i-lucide-plus">Create Item</UButton>
+</div>
+```
+
+### Loading State
+```vue
+<div v-if="pending" class="flex justify-center py-12">
+  <UIcon name="i-lucide-loader-2" class="w-8 h-8 animate-spin text-muted" />
+</div>
+```
+
+### Form Modal Pattern
+```vue
+<script setup>
+const isOpen = ref(false)
+const loading = ref(false)
+const toast = useToast()
+
+const state = reactive({ title: '', description: '' })
+const schema = z.object({
+  title: z.string().min(1, 'Required'),
+  description: z.string().min(10)
+})
+
+async function onSubmit(event: FormSubmitEvent<z.output<typeof schema>>) {
+  loading.value = true
+  try {
+    await $fetch('/api/items', { method: 'POST', body: event.data })
+    toast.add({ title: 'Created', color: 'success' })
+    isOpen.value = false
+  } catch {
+    toast.add({ title: 'Error', color: 'error' })
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+```
+
+### Page with Middleware
+```vue
+<script setup>
+definePageMeta({
+  middleware: 'auth',
+  layout: 'dashboard'
+})
+
+useSeoMeta({
+  title: 'Dashboard',
+  description: 'Your dashboard'
+})
+</script>
+```
+
+---
+
+## Tailwind Classes
+
+Common utilities:
+- **Spacing**: `p-4`, `px-6`, `py-2`, `m-4`, `gap-4`, `space-y-4`
+- **Flex**: `flex`, `items-center`, `justify-between`, `flex-1`, `flex-col`
+- **Grid**: `grid`, `grid-cols-3`, `gap-4`
+- **Text**: `text-sm`, `text-muted`, `font-semibold`, `truncate`, `line-clamp-2`
+- **Interactive**: `hover:bg-muted`, `transition-colors`, `cursor-pointer`
+
+---
+
+## Checklist
+
+Before writing code:
+- [ ] Used MCP tool to get component docs
+- [ ] No manual Vue/Nuxt imports (auto-imported)
+- [ ] Component follows naming convention
+- [ ] Using correct icon format (`i-lucide-*`)
+- [ ] Using semantic colors (`primary`, `success`, etc.)
+- [ ] Form has Zod schema
+- [ ] Added toast for user feedback
+- [ ] Added loading/error states

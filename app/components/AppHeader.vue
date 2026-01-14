@@ -2,35 +2,9 @@
 import { LazyAuthLoginModal } from '#components'
 
 const { t, locale, locales, setLocale } = useI18n()
-const { loggedIn } = useUserSession()
-const route = useRoute()
+const { loggedIn, user, clear } = useUserSession()
 const overlay = useOverlay()
 const loginModal = overlay.create(LazyAuthLoginModal)
-
-const items = computed(() => {
-  const baseItems = [{
-    label: 'Map',
-    to: '/map',
-    icon: 'i-lucide-map'
-  }]
-
-  if (loggedIn.value) {
-    return [
-      ...baseItems,
-      {
-        label: t('nav.dashboard'),
-        to: '/dashboard',
-        icon: 'i-lucide-layout-dashboard'
-      },
-      {
-        label: t('nav.newIssue'),
-        to: '/issues/new',
-        icon: 'i-lucide-plus-circle'
-      }
-    ]
-  }
-  return baseItems
-})
 
 const localeItems = computed(() => {
   return (locales.value as Array<{ code: string; name: string }>).map(l => ({
@@ -39,8 +13,31 @@ const localeItems = computed(() => {
   }))
 })
 
+const profileItems = computed(() => [
+  [{
+    label: t('nav.myReports'),
+    icon: 'i-lucide-file-text',
+    to: '/mis-denuncias'
+  },
+  {
+    label: t('nav.profile'),
+    icon: 'i-lucide-user',
+    to: '/profile'
+  }],
+  [{
+    label: t('nav.logout'),
+    icon: 'i-lucide-log-out',
+    onSelect: logout
+  }]
+])
+
 async function openLogin() {
   await loginModal.open({}).result
+}
+
+async function logout() {
+  await clear()
+  navigateTo('/')
 }
 </script>
 
@@ -59,12 +56,6 @@ async function openLogin() {
       </NuxtLink>
     </template>
 
-    <UNavigationMenu
-      v-if="items.length"
-      :items="items"
-      variant="link"
-    />
-
     <template #right>
       <UDropdownMenu :items="[localeItems]">
         <UButton
@@ -77,48 +68,25 @@ async function openLogin() {
 
       <UColorModeButton />
 
-      <template v-if="loggedIn">
-        <UButton
-          icon="i-lucide-plus"
-          color="primary"
-          to="/issues/new"
-          class="lg:hidden"
+      <UDropdownMenu v-if="loggedIn" :items="profileItems">
+        <UAvatar
+          :src="user?.avatarUrl"
+          :alt="user?.name"
+          size="sm"
+          class="cursor-pointer"
         />
-        <UButton
-          :label="t('nav.newIssue')"
-          icon="i-lucide-plus"
-          color="primary"
-          to="/issues/new"
-          class="hidden lg:inline-flex"
-        />
-      </template>
-      <template v-else>
-        <UButton
-          icon="i-lucide-log-in"
-          color="primary"
-          variant="ghost"
-          class="lg:hidden"
-          @click="openLogin"
-        />
-        <UButton
-          :label="t('nav.getStarted')"
-          color="primary"
-          class="hidden lg:inline-flex"
-          @click="openLogin"
-        />
-      </template>
+      </UDropdownMenu>
+
+      <UButton
+        v-else
+        icon="i-lucide-log-in"
+        color="primary"
+        size="sm"
+        @click="openLogin"
+      />
     </template>
 
     <template #body>
-      <UNavigationMenu
-        v-if="items.length"
-        :items="items"
-        orientation="vertical"
-        class="-mx-2.5"
-      />
-
-      <USeparator class="my-6" />
-
       <div class="flex items-center gap-2 mb-4">
         <UButton
           v-for="l in (locales as Array<{ code: string; name: string }>)"
@@ -132,15 +100,7 @@ async function openLogin() {
       </div>
 
       <UButton
-        v-if="loggedIn"
-        :label="t('nav.newIssue')"
-        icon="i-lucide-plus"
-        color="primary"
-        to="/issues/new"
-        block
-      />
-      <UButton
-        v-else
+        v-if="!loggedIn"
         :label="t('nav.getStarted')"
         color="primary"
         block

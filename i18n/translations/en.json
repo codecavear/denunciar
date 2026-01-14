@@ -8,7 +8,10 @@
   "nav": {
     "dashboard": "My Reports",
     "newIssue": "Report Issue",
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "myReports": "My Reports",
+    "profile": "Profile",
+    "logout": "Logout"
   },
   "common": {
     "cancel": "Cancel",
@@ -28,6 +31,15 @@
     "in_progress": "In Progress",
     "resolved": "Resolved",
     "closed": "Closed"
+  },
+  "dashboard": {
+    "title": "My Reports",
+    "subtitle": "Track and manage your reports",
+    "all": "All",
+    "newReport": "New Report",
+    "noReports": "No reports yet",
+    "noReportsDescription": "Start by creating your first report",
+    "createReport": "Create Report"
   },
   "map": {
     "legend": "Status",

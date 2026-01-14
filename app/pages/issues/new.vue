@@ -68,7 +68,7 @@ async function onSubmit(event: FormSubmitEvent<IssueSchema>) {
   <UContainer class="py-8 max-w-2xl">
     <div class="mb-8">
       <NuxtLink
-        to="/dashboard"
+        to="/mis-denuncias"
         class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-1"
       >
         <UIcon name="i-lucide-arrow-left" class="w-4 h-4" />
@@ -120,7 +120,7 @@ async function onSubmit(event: FormSubmitEvent<IssueSchema>) {
           type="button"
           color="neutral"
           variant="outline"
-          to="/dashboard"
+          to="/mis-denuncias"
         >
           {{ t('common.cancel') }}
         </UButton>

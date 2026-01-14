@@ -13,7 +13,7 @@ type PublicIssue = Issue & {
 }
 
 const config = useRuntimeConfig()
-const { loggedIn, user, clear } = useUserSession()
+const { loggedIn, user } = useUserSession()
 const toast = useToast()
 const { t } = useI18n()
 const overlay = useOverlay()
@@ -171,10 +171,6 @@ function centerMap() {
   )
 }
 
-async function logout() {
-  await clear()
-  navigateTo('/auth/login')
-}
 
   function addMarkers() {
   if (!map.value || !issues.value) return
@@ -441,18 +437,6 @@ async function openCreateModal() {
       </div>
     </div>
 
-    <!-- Report button -->
-    <!-- Top Right Controls (Logout) -->
-    <div class="absolute top-4 right-4 z-40">
-      <UButton
-        v-if="loggedIn"
-        icon="i-lucide-log-out"
-        color="neutral"
-        variant="solid"
-        class="shadow-md bg-white dark:bg-gray-800"
-        @click="logout"
-      />
-    </div>
 
     <!-- Bottom Right Controls (Location & Report) -->
     <div class="absolute bottom-4 right-4 z-40 flex flex-col items-end gap-2">

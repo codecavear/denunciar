@@ -5,6 +5,8 @@ defineProps<{
   issue: Issue & { entity?: Entity | null }
 }>()
 
+const { t } = useI18n()
+
 type BadgeColor = 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | 'neutral'
 
 const statusColors: Record<string, BadgeColor> = {
@@ -14,11 +16,8 @@ const statusColors: Record<string, BadgeColor> = {
   closed: 'neutral'
 }
 
-const statusLabels: Record<string, string> = {
-  pending: 'Pending',
-  in_progress: 'In Progress',
-  resolved: 'Resolved',
-  closed: 'Closed'
+function getStatusLabel(status: string) {
+  return t(`status.${status}`)
 }
 
 function formatDate(date: Date | string) {
@@ -51,12 +50,12 @@ function formatDate(date: Date | string) {
         </div>
 
         <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-2">
+          <div class="flex items-start justify-between gap-1">
             <h3 class="font-medium text-gray-900 dark:text-white truncate">
               {{ issue.title }}
             </h3>
-            <UBadge :color="statusColors[issue.status]" variant="subtle" size="sm">
-              {{ statusLabels[issue.status] }}
+            <UBadge :color="statusColors[issue.status]" variant="subtle" size="xs" class="flex-shrink-0">
+              {{ getStatusLabel(issue.status) }}
             </UBadge>
           </div>
 
