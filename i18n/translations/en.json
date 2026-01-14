@@ -1,4 +1,8 @@
 {
+  "seo": {
+    "map": "Map",
+    "login": "Login"
+  },
   "auth": {
     "welcomeBack": "Welcome back",
     "signInAccess": "Sign in to report issues in your community",

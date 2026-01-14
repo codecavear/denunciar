@@ -8,6 +8,7 @@ definePageMeta({
 })
 
 const { t } = useI18n()
+
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
@@ -17,6 +18,10 @@ const isEditing = ref(false)
 const isSaving = ref(false)
 
 const { data: issue, refresh } = await useFetch<Issue & { entity: Entity | null }>(`/api/issues/${issueId}`)
+
+useSeoMeta({
+  title: () => issue.value?.title || t('issue.notFound')
+})
 
 const editSchema = z.object({
   title: z.string().min(1, t('validation.titleRequired')).max(200),

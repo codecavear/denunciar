@@ -8,6 +8,11 @@ definePageMeta({
 })
 
 const { t } = useI18n()
+
+useSeoMeta({
+  title: () => t('entities.title')
+})
+
 const toast = useToast()
 
 const { data: entities, refresh } = await useFetch<Entity[]>('/api/entities')

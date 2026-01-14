@@ -5,6 +5,12 @@ definePageMeta({
   layout: 'map'
 })
 
+const { t } = useI18n()
+
+useSeoMeta({
+  title: () => t('seo.map')
+})
+
 type PublicIssue = Issue & {
   entity: Entity | null
   user: { id: string; name: string; avatarUrl: string | null } | null
@@ -14,7 +20,6 @@ type PublicIssue = Issue & {
 const config = useRuntimeConfig()
 const { loggedIn, user } = useUserSession()
 const toast = useToast()
-const { t } = useI18n()
 
 const mapContainer = ref<HTMLDivElement>()
 const map = shallowRef<google.maps.Map>()

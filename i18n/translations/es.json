@@ -1,4 +1,8 @@
 {
+  "seo": {
+    "map": "Mapa",
+    "login": "Iniciar Sesion"
+  },
   "auth": {
     "welcomeBack": "Bienvenido",
     "signInAccess": "Inicia sesion para reportar problemas en tu comunidad",

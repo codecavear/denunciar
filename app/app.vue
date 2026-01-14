@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { locale, t } = useI18n()
 const colorMode = useColorMode()
 
 const color = computed(() => colorMode.value === 'dark' ? '#020618' : 'white')
@@ -13,13 +14,16 @@ useHead({
     { rel: 'icon', href: '/favicon.ico' }
   ],
   htmlAttrs: {
-    lang: 'en'
+    lang: locale
   }
 })
 
 useSeoMeta({
-  titleTemplate: '%s - Denunciar',
-  twitterCard: 'summary_large_image'
+  titleTemplate: 'Denunciar - %s',
+  ogSiteName: 'Denunciar',
+  twitterCard: 'summary_large_image',
+  description: () => t('home.seo.description'),
+  ogDescription: () => t('home.seo.description')
 })
 
 // Content navigation and search removed - @nuxt/content not installed

@@ -7,7 +7,7 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Login'
+  title: () => t('seo.login')
 })
 
 watchEffect(() => {

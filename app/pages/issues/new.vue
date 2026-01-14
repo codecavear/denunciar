@@ -7,6 +7,11 @@ definePageMeta({
 })
 
 const { t } = useI18n()
+
+useSeoMeta({
+  title: () => t('issue.reportAnIssue')
+})
+
 const router = useRouter()
 const toast = useToast()
 

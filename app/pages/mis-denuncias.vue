@@ -6,6 +6,11 @@ definePageMeta({
 })
 
 const { t } = useI18n()
+
+useSeoMeta({
+  title: () => t('dashboard.title')
+})
+
 const { data: issues, refresh, status } = await useFetch<Array<Issue & { entity: Entity | null }>>('/api/issues')
 
 const statusFilter = ref<string>()

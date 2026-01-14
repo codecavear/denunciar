@@ -4,6 +4,11 @@ definePageMeta({
 })
 
 const { t } = useI18n()
+
+useSeoMeta({
+  title: () => t('profile.title')
+})
+
 const { user, clear } = useUserSession()
 
 async function logout() {
