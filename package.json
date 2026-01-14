@@ -1,5 +1,5 @@
 {
-  "name": "denunciar",
+  "name": "reportar",
   "description": "Citizen issue reporting app with AI-powered routing to government departments",
   "private": true,
   "type": "module",

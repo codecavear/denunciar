@@ -20,7 +20,7 @@ const localeItems = computed(() => {
           name="i-lucide-megaphone"
           class="w-6 h-6 text-primary"
         />
-        Denunciar
+        Reportar
       </NuxtLink>
     </template>
 

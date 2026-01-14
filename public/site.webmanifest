@@ -1,6 +1,6 @@
 {
-  "name": "Denunciar",
-  "short_name": "Denunciar",
+  "name": "Reportar",
+  "short_name": "Reportar",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

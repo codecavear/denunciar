@@ -21,7 +21,10 @@
       "mcp__nuxt-ui-remote__get-component-metadata",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(git -C \"C:\\\\Users\\\\conra\\\\Documents\\\\code\\\\denunciar\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\conra\\\\Documents\\\\code\\\\denunciar\" add -A)",
+      "Bash(git -C \"C:\\\\Users\\\\conra\\\\Documents\\\\code\\\\denunciar\" commit -m \"$\\(cat <<''EOF''\nRename app from Denunciar to Reportar\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }

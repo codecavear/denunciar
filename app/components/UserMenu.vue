@@ -15,7 +15,7 @@ const profileItems = computed(() => [
   {
     label: t('nav.myReports'),
     icon: 'i-lucide-file-text',
-    to: '/mis-denuncias'
+    to: '/mis-reportes'
   },
   {
     label: t('nav.profile'),

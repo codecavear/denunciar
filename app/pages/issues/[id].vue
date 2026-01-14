@@ -101,7 +101,7 @@ function formatDate(date: Date | string) {
   <UContainer class="py-8 max-w-3xl">
     <div class="mb-6">
       <NuxtLink
-        to="/mis-denuncias"
+        to="/mis-reportes"
         class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-1"
       >
         <UIcon name="i-lucide-arrow-left" class="w-4 h-4" />

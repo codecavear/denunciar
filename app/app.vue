@@ -19,8 +19,8 @@ useHead({
 })
 
 useSeoMeta({
-  titleTemplate: 'Denunciar - %s',
-  ogSiteName: 'Denunciar',
+  titleTemplate: 'Reportar - %s',
+  ogSiteName: 'Reportar',
   twitterCard: 'summary_large_image',
   description: () => t('home.seo.description'),
   ogDescription: () => t('home.seo.description')

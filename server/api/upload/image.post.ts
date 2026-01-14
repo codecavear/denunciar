@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
     const base64 = `data:${file.type};base64,${file.data.toString('base64')}`
 
     const result = await cloudinary.uploader.upload(base64, {
-      folder: 'denunciar/issues',
+      folder: 'reportar/issues',
       resource_type: 'image',
       transformation: [
         { width: 1200, height: 1200, crop: 'limit' },

@@ -22,7 +22,7 @@ const localeItems = computed(() => {
             name="i-lucide-megaphone"
             class="w-5 h-5 text-primary"
           />
-          <span class="font-bold">Denunciar</span>
+          <span class="font-bold">Reportar</span>
         </NuxtLink>
 
         <div class="pointer-events-auto flex items-center gap-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-1">

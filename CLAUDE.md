@@ -1,4 +1,4 @@
-# Denunciar
+# Reportar
 
 Full-stack Nuxt application with Google OAuth, PostgreSQL database, and i18n support. Based on the Nuxt UI Pro SaaS template.
 
