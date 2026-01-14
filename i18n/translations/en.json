@@ -16,7 +16,8 @@
     "map": "Map",
     "myReports": "My Reports",
     "profile": "Profile",
-    "logout": "Logout"
+    "logout": "Logout",
+    "login": "Login"
   },
   "common": {
     "cancel": "Cancel",

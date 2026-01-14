@@ -7,7 +7,7 @@ definePageMeta({
 const router = useRouter()
 
 onMounted(() => {
-  router.replace('/map')
+  router.replace('/mapa')
 })
 </script>
 

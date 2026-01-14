@@ -16,7 +16,8 @@
     "map": "Mapa",
     "myReports": "Mis reportes",
     "profile": "Perfil",
-    "logout": "Cerrar sesion"
+    "logout": "Cerrar sesion",
+    "login": "Ingresar"
   },
   "common": {
     "cancel": "Cancelar",

@@ -10,7 +10,7 @@ const profileItems = computed(() => [
   [{
     label: t('nav.map'),
     icon: 'i-lucide-map',
-    to: '/map'
+    to: '/mapa'
   },
   {
     label: t('nav.myReports'),
@@ -20,7 +20,7 @@ const profileItems = computed(() => [
   {
     label: t('nav.profile'),
     icon: 'i-lucide-user',
-    to: '/profile'
+    to: '/perfil'
   }],
   [{
     label: t('nav.logout'),
@@ -52,6 +52,7 @@ async function logout() {
   <UButton
     v-else
     icon="i-lucide-log-in"
+    :label="t('nav.login')"
     color="primary"
     size="sm"
     @click="openLogin"

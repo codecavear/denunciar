@@ -12,7 +12,7 @@ useSeoMeta({
 
 watchEffect(() => {
   if (loggedIn.value) {
-    navigateTo('/map')
+    navigateTo('/mapa')
   }
 })
 

@@ -59,7 +59,7 @@ export default defineOAuthGoogleEventHandler({
       return sendRedirect(event, redirectUrl)
     }
 
-    return sendRedirect(event, '/map')
+    return sendRedirect(event, '/mapa')
   },
   onError(event, error) {
     console.error('Google OAuth error:', error)
