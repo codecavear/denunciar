@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { Issue, Entity } from '#shared/types'
-import { LazyIssueCreateModal } from '#components'
 
 definePageMeta({
   layout: 'map'
@@ -16,8 +15,6 @@ const config = useRuntimeConfig()
 const { loggedIn, user } = useUserSession()
 const toast = useToast()
 const { t } = useI18n()
-const overlay = useOverlay()
-const issueModal = overlay.create(LazyIssueCreateModal)
 
 const mapContainer = ref<HTMLDivElement>()
 const map = shallowRef<google.maps.Map>()
@@ -343,13 +340,6 @@ function formatDate(date: Date | string) {
 async function onIssueCreated() {
   await refreshIssues()
 }
-
-async function openCreateModal() {
-  const result = await issueModal.open({}).result
-  if (result) {
-    await onIssueCreated()
-  }
-}
 </script>
 
 <template>
@@ -448,15 +438,7 @@ async function openCreateModal() {
         class="shadow-md !bg-white !text-gray-700 border-gray-200"
         @click="centerMap"
       />
-      <UButton
-        icon="i-lucide-plus"
-        size="lg"
-        color="primary"
-        class="shadow-lg"
-        @click="openCreateModal"
-      >
-        {{ t('map.createReport') }}
-      </UButton>
+      <CreateReportButton variant="map" @created="onIssueCreated" />
     </div>
 
     <!-- Issue detail panel -->

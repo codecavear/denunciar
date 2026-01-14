@@ -9,6 +9,7 @@
     "dashboard": "Mis Denuncias",
     "newIssue": "Nueva Denuncia",
     "getStarted": "Comenzar",
+    "map": "Mapa",
     "myReports": "Mis denuncias",
     "profile": "Perfil",
     "logout": "Cerrar sesion"
@@ -31,6 +32,14 @@
     "in_progress": "En Progreso",
     "resolved": "Resuelto",
     "closed": "Cerrado"
+  },
+  "profile": {
+    "title": "Perfil",
+    "account": "Cuenta",
+    "connectedWith": "Conectado con",
+    "dangerZone": "Zona de Peligro",
+    "logout": "Cerrar sesion",
+    "logoutDescription": "Cierra sesion de tu cuenta en este dispositivo"
   },
   "dashboard": {
     "title": "Mis Denuncias",

@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import { LazyAuthLoginModal } from '#components'
-
-const { t, locale, locales, setLocale } = useI18n()
-const { loggedIn, user, clear } = useUserSession()
-const overlay = useOverlay()
-const loginModal = overlay.create(LazyAuthLoginModal)
+const { locale, locales, setLocale } = useI18n()
 
 const localeItems = computed(() => {
   return (locales.value as Array<{ code: string; name: string }>).map(l => ({
@@ -12,33 +7,6 @@ const localeItems = computed(() => {
     onSelect: () => setLocale(l.code as 'en' | 'es')
   }))
 })
-
-const profileItems = computed(() => [
-  [{
-    label: t('nav.myReports'),
-    icon: 'i-lucide-file-text',
-    to: '/mis-denuncias'
-  },
-  {
-    label: t('nav.profile'),
-    icon: 'i-lucide-user',
-    to: '/profile'
-  }],
-  [{
-    label: t('nav.logout'),
-    icon: 'i-lucide-log-out',
-    onSelect: logout
-  }]
-])
-
-async function openLogin() {
-  await loginModal.open({}).result
-}
-
-async function logout() {
-  await clear()
-  navigateTo('/')
-}
 </script>
 
 <template>
@@ -69,22 +37,7 @@ async function logout() {
 
           <UColorModeButton />
 
-          <UDropdownMenu v-if="loggedIn" :items="profileItems">
-            <UAvatar
-              :src="user?.avatarUrl"
-              :alt="user?.name"
-              size="sm"
-              class="cursor-pointer"
-            />
-          </UDropdownMenu>
-
-          <UButton
-            v-if="!loggedIn"
-            icon="i-lucide-log-in"
-            color="primary"
-            size="sm"
-            @click="openLogin"
-          />
+          <UserMenu />
         </div>
       </div>
     </div>
