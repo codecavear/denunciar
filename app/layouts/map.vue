@@ -16,13 +16,16 @@ const localeItems = computed(() => {
       <div class="flex items-center justify-between p-4">
         <NuxtLink
           to="/"
-          class="pointer-events-auto flex items-center gap-3 px-4 py-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg w-[160px]"
+          class="pointer-events-auto flex items-center justify-between px-3 py-1.5 bg-white dark:bg-gray-900 rounded-lg shadow-lg w-[160px]"
         >
-          <UIcon
-            name="i-lucide-megaphone"
-            class="w-5 h-5 text-primary"
-          />
-          <span class="font-bold">Reportar</span>
+          <div class="flex items-center gap-2">
+            <UIcon
+              name="i-lucide-megaphone"
+              class="w-5 h-5 text-primary"
+            />
+            <span class="font-bold">Reportar</span>
+          </div>
+          <ArgentinaFlag />
         </NuxtLink>
 
         <div class="pointer-events-auto flex items-center gap-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-1">

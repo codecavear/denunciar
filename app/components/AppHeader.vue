@@ -21,6 +21,7 @@ const localeItems = computed(() => {
           class="w-6 h-6 text-primary"
         />
         Reportar
+        <ArgentinaFlag />
       </NuxtLink>
     </template>
 
