@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { Entity } from '#shared/types'
+import * as z from 'zod'
+import type { FormSubmitEvent } from '@nuxt/ui'
 
 definePageMeta({
   middleware: 'auth'
@@ -14,10 +16,21 @@ const isModalOpen = ref(false)
 const editingEntity = ref<Entity | null>(null)
 const isSaving = ref(false)
 
-const form = ref({
+const entitySchema = z.object({
+  name: z.string().min(1, t('entities.nameRequired')).max(100),
+  description: z.string().max(500).optional(),
+  keywords: z.array(z.string()).optional(),
+  icon: z.string().default('i-lucide-alert-circle'),
+  contactEmail: z.string().email(t('validation.invalidEmail')).optional().or(z.literal('')),
+  isActive: z.boolean().default(true)
+})
+
+type EntitySchema = z.output<typeof entitySchema>
+
+const state = reactive<Partial<EntitySchema>>({
   name: '',
   description: '',
-  keywords: [] as string[],
+  keywords: [],
   icon: 'i-lucide-alert-circle',
   contactEmail: '',
   isActive: true
@@ -42,59 +55,54 @@ const newKeyword = ref('')
 
 function openCreateModal() {
   editingEntity.value = null
-  form.value = {
+  Object.assign(state, {
     name: '',
     description: '',
     keywords: [],
     icon: 'i-lucide-alert-circle',
     contactEmail: '',
     isActive: true
-  }
+  })
   isModalOpen.value = true
 }
 
 function openEditModal(entity: Entity) {
   editingEntity.value = entity
-  form.value = {
+  Object.assign(state, {
     name: entity.name,
     description: entity.description || '',
     keywords: entity.keywords || [],
     icon: entity.icon || 'i-lucide-alert-circle',
     contactEmail: entity.contactEmail || '',
     isActive: entity.isActive
-  }
+  })
   isModalOpen.value = true
 }
 
 function addKeyword() {
-  if (newKeyword.value && !form.value.keywords.includes(newKeyword.value)) {
-    form.value.keywords.push(newKeyword.value)
+  if (newKeyword.value && !state.keywords?.includes(newKeyword.value)) {
+    state.keywords = [...(state.keywords || []), newKeyword.value]
     newKeyword.value = ''
   }
 }
 
 function removeKeyword(keyword: string) {
-  form.value.keywords = form.value.keywords.filter(k => k !== keyword)
+  state.keywords = (state.keywords || []).filter(k => k !== keyword)
 }
 
-async function saveEntity() {
-  if (!form.value.name) {
-    toast.add({ title: t('entities.nameRequired'), color: 'error' })
-    return
-  }
-
+async function onSubmit(event: FormSubmitEvent<EntitySchema>) {
   isSaving.value = true
   try {
     if (editingEntity.value) {
       await $fetch(`/api/entities/${editingEntity.value.id}`, {
         method: 'PUT',
-        body: form.value
+        body: event.data
       })
       toast.add({ title: t('entities.entityUpdated'), color: 'success' })
     } else {
       await $fetch('/api/entities', {
         method: 'POST',
-        body: form.value
+        body: event.data
       })
       toast.add({ title: t('entities.entityCreated'), color: 'success' })
     }
@@ -208,37 +216,37 @@ async function saveEntity() {
       <span class="hidden" />
 
       <template #body>
-        <form id="entity-form" class="space-y-4" @submit.prevent="saveEntity">
-          <UFormField :label="t('entities.name')" required>
+        <UForm id="entity-form" :schema="entitySchema" :state="state" class="space-y-4" @submit="onSubmit">
+          <UFormField :label="t('entities.name')" name="name" required>
             <UInput
-              v-model="form.name"
+              v-model="state.name"
               :placeholder="t('entities.namePlaceholder')"
             />
           </UFormField>
 
-          <UFormField :label="t('entities.icon')">
+          <UFormField :label="t('entities.icon')" name="icon">
             <div class="flex flex-wrap gap-2">
               <button
                 v-for="opt in iconOptions"
                 :key="opt.value"
                 type="button"
                 class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
-                :class="form.icon === opt.value ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'"
-                @click="form.icon = opt.value"
+                :class="state.icon === opt.value ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'"
+                @click="state.icon = opt.value"
               >
                 <UIcon :name="opt.icon" class="w-5 h-5" />
               </button>
             </div>
           </UFormField>
 
-          <UFormField :label="t('issue.description')">
+          <UFormField :label="t('issue.description')" name="description">
             <UTextarea
-              v-model="form.description"
+              v-model="state.description"
               :rows="2"
             />
           </UFormField>
 
-          <UFormField :label="t('entities.keywords')">
+          <UFormField :label="t('entities.keywords')" name="keywords">
             <div class="space-y-2">
               <div class="flex gap-2">
                 <UInput
@@ -254,9 +262,9 @@ async function saveEntity() {
                   @click="addKeyword"
                 />
               </div>
-              <div v-if="form.keywords.length" class="flex flex-wrap gap-1">
+              <div v-if="state.keywords?.length" class="flex flex-wrap gap-1">
                 <UBadge
-                  v-for="keyword in form.keywords"
+                  v-for="keyword in state.keywords"
                   :key="keyword"
                   color="primary"
                   variant="subtle"
@@ -270,22 +278,22 @@ async function saveEntity() {
             </div>
           </UFormField>
 
-          <UFormField :label="t('entities.contactEmail')">
+          <UFormField :label="t('entities.contactEmail')" name="contactEmail">
             <UInput
-              v-model="form.contactEmail"
+              v-model="state.contactEmail"
               type="email"
               :placeholder="t('entities.emailPlaceholder')"
             />
           </UFormField>
 
-          <UFormField>
+          <UFormField name="isActive">
             <UCheckbox
-              v-model="form.isActive"
+              v-model="state.isActive"
               :label="t('entities.active')"
               :description="t('entities.activeDescription')"
             />
           </UFormField>
-        </form>
+        </UForm>
       </template>
 
       <template #footer>

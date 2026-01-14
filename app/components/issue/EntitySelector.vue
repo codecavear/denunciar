@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { Entity } from '#shared/types'
 
+const { t } = useI18n()
+
 const props = defineProps<{
   modelValue?: string | null
   aiSuggestion?: { entityId: string | null; confidence: number; reason: string } | null
@@ -42,7 +44,7 @@ function acceptSuggestion() {
     <USelectMenu
       v-model="selected"
       :items="options"
-      placeholder="Select department"
+      :placeholder="t('entity.selectDepartment')"
       value-key="value"
       option-key="value"
       class="w-full"
@@ -56,13 +58,13 @@ function acceptSuggestion() {
         <UIcon name="i-lucide-sparkles" class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
         <div class="flex-1 min-w-0">
           <p class="text-sm font-medium text-blue-700 dark:text-blue-300">
-            AI Suggestion: {{ suggestedEntity.name }}
+            {{ t('entity.aiSuggestion') }}: {{ suggestedEntity.name }}
           </p>
           <p class="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
             {{ aiSuggestion.reason }}
           </p>
           <p class="text-xs text-blue-500 dark:text-blue-500 mt-1">
-            Confidence: {{ Math.round(aiSuggestion.confidence * 100) }}%
+            {{ t('entity.confidence') }}: {{ Math.round(aiSuggestion.confidence * 100) }}%
           </p>
         </div>
         <UButton
@@ -71,7 +73,7 @@ function acceptSuggestion() {
           variant="soft"
           @click="acceptSuggestion"
         >
-          Accept
+          {{ t('entity.accept') }}
         </UButton>
       </div>
     </div>

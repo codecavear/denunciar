@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import type { Issue, Entity } from '#shared/types'
+import * as z from 'zod'
+import type { FormSubmitEvent } from '@nuxt/ui'
 
 definePageMeta({
   middleware: 'auth'
 })
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
@@ -15,19 +18,27 @@ const isSaving = ref(false)
 
 const { data: issue, refresh } = await useFetch<Issue & { entity: Entity | null }>(`/api/issues/${issueId}`)
 
-const editForm = ref({
+const editSchema = z.object({
+  title: z.string().min(1, t('validation.titleRequired')).max(200),
+  description: z.string().min(1, t('validation.descriptionRequired')).max(2000),
+  status: z.enum(['pending', 'in_progress', 'resolved', 'closed'])
+})
+
+type EditSchema = z.output<typeof editSchema>
+
+const editState = reactive<Partial<EditSchema>>({
   title: '',
   description: '',
-  status: '' as Issue['status']
+  status: 'pending'
 })
 
 function startEditing() {
   if (!issue.value) return
-  editForm.value = {
+  Object.assign(editState, {
     title: issue.value.title,
     description: issue.value.description,
     status: issue.value.status
-  }
+  })
   isEditing.value = true
 }
 
@@ -35,19 +46,19 @@ function cancelEditing() {
   isEditing.value = false
 }
 
-async function saveChanges() {
+async function onSubmit(event: FormSubmitEvent<EditSchema>) {
   isSaving.value = true
   try {
     await $fetch(`/api/issues/${issueId}`, {
       // @ts-expect-error - Nuxt typed routes restricts method types incorrectly
       method: 'PUT',
-      body: editForm.value
+      body: event.data
     })
     await refresh()
     isEditing.value = false
-    toast.add({ title: 'Changes saved', color: 'success' })
+    toast.add({ title: t('issue.changesSaved'), color: 'success' })
   } catch (e) {
-    toast.add({ title: 'Failed to save changes', color: 'error' })
+    toast.add({ title: t('issue.saveFailed'), color: 'error' })
     console.error(e)
   } finally {
     isSaving.value = false
@@ -89,13 +100,13 @@ function formatDate(date: Date | string) {
         class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-1"
       >
         <UIcon name="i-lucide-arrow-left" class="w-4 h-4" />
-        Back to Dashboard
+        {{ t('nav.dashboard') }}
       </NuxtLink>
     </div>
 
     <div v-if="!issue" class="text-center py-12">
       <UIcon name="i-lucide-alert-circle" class="w-12 h-12 mx-auto text-gray-400" />
-      <p class="mt-4 text-gray-500">Issue not found</p>
+      <p class="mt-4 text-gray-500">{{ t('issue.notFound') }}</p>
     </div>
 
     <div v-else>
@@ -107,118 +118,163 @@ function formatDate(date: Date | string) {
         >
       </div>
 
-      <div class="flex items-start justify-between gap-4 mb-6">
-        <div class="flex-1">
-          <template v-if="isEditing">
-            <UInput
-              v-model="editForm.title"
-              size="lg"
-              class="text-xl font-bold"
+      <UForm v-if="isEditing" :schema="editSchema" :state="editState" @submit="onSubmit">
+        <div class="flex items-start justify-between gap-4 mb-6">
+          <div class="flex-1">
+            <UFormField name="title">
+              <UInput
+                v-model="editState.title"
+                size="lg"
+                class="text-xl font-bold"
+              />
+            </UFormField>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <UFormField name="status">
+              <USelectMenu
+                v-model="editState.status"
+                :items="statusOptions"
+                value-key="value"
+              />
+            </UFormField>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
+          <div v-if="issue.entity" class="flex items-center gap-2 text-gray-500">
+            <UIcon name="i-lucide-building-2" class="w-4 h-4" />
+            <span>{{ issue.entity.name }}</span>
+          </div>
+          <div v-if="issue.address" class="flex items-center gap-2 text-gray-500">
+            <UIcon name="i-lucide-map-pin" class="w-4 h-4" />
+            <span>{{ issue.address }}</span>
+          </div>
+          <div class="flex items-center gap-2 text-gray-500">
+            <UIcon name="i-lucide-calendar" class="w-4 h-4" />
+            <span>{{ t('issue.created') }} {{ formatDate(issue.createdAt) }}</span>
+          </div>
+          <div v-if="issue.aiConfidence" class="flex items-center gap-2 text-gray-500">
+            <UIcon name="i-lucide-sparkles" class="w-4 h-4" />
+            <span>{{ t('issue.aiConfidence') }}: {{ Math.round(Number(issue.aiConfidence) * 100) }}%</span>
+          </div>
+        </div>
+
+        <UCard class="mb-6">
+          <template #header>
+            <h2 class="font-medium">{{ t('issue.description') }}</h2>
+          </template>
+
+          <UFormField name="description">
+            <UTextarea
+              v-model="editState.description"
+              :rows="4"
             />
-          </template>
-          <template v-else>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-              {{ issue.title }}
-            </h1>
-          </template>
-        </div>
+          </UFormField>
+        </UCard>
 
-        <div class="flex items-center gap-2">
-          <template v-if="isEditing">
-            <USelectMenu
-              v-model="editForm.status"
-              :items="statusOptions"
-              value-key="value"
-              option-key="value"
+        <div
+          v-if="issue.latitude && issue.longitude"
+          class="mb-6"
+        >
+          <h2 class="font-medium mb-3">{{ t('issue.location') }}</h2>
+          <div class="h-64 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+            <IssueLocationPicker
+              :latitude="Number(issue.latitude)"
+              :longitude="Number(issue.longitude)"
+              :address="issue.address"
             />
-          </template>
-          <template v-else>
-            <UBadge :color="statusColors[issue?.status ?? 'pending']" size="lg">
-              {{ statusOptions.find(s => s.value === issue?.status)?.label }}
-            </UBadge>
-          </template>
+          </div>
         </div>
-      </div>
 
-      <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
-        <div v-if="issue.entity" class="flex items-center gap-2 text-gray-500">
-          <UIcon name="i-lucide-building-2" class="w-4 h-4" />
-          <span>{{ issue.entity.name }}</span>
-        </div>
-        <div v-if="issue.address" class="flex items-center gap-2 text-gray-500">
-          <UIcon name="i-lucide-map-pin" class="w-4 h-4" />
-          <span>{{ issue.address }}</span>
-        </div>
-        <div class="flex items-center gap-2 text-gray-500">
-          <UIcon name="i-lucide-calendar" class="w-4 h-4" />
-          <span>Created {{ formatDate(issue.createdAt) }}</span>
-        </div>
-        <div v-if="issue.aiConfidence" class="flex items-center gap-2 text-gray-500">
-          <UIcon name="i-lucide-sparkles" class="w-4 h-4" />
-          <span>AI Confidence: {{ Math.round(Number(issue.aiConfidence) * 100) }}%</span>
-        </div>
-      </div>
-
-      <UCard class="mb-6">
-        <template #header>
-          <h2 class="font-medium">Description</h2>
-        </template>
-
-        <template v-if="isEditing">
-          <UTextarea
-            v-model="editForm.description"
-            :rows="4"
-          />
-        </template>
-        <template v-else>
-          <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-            {{ issue.description }}
-          </p>
-        </template>
-      </UCard>
-
-      <div
-        v-if="issue.latitude && issue.longitude"
-        class="mb-6"
-      >
-        <h2 class="font-medium mb-3">Location</h2>
-        <div class="h-64 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-          <IssueLocationPicker
-            :latitude="Number(issue.latitude)"
-            :longitude="Number(issue.longitude)"
-            :address="issue.address"
-          />
-        </div>
-      </div>
-
-      <div class="flex gap-3">
-        <template v-if="isEditing">
+        <div class="flex gap-3">
           <UButton
+            type="button"
             color="neutral"
             variant="outline"
             @click="cancelEditing"
           >
-            Cancel
+            {{ t('common.cancel') }}
           </UButton>
           <UButton
+            type="submit"
             color="primary"
             :loading="isSaving"
-            @click="saveChanges"
           >
-            Save Changes
+            {{ t('common.save') }}
           </UButton>
-        </template>
-        <template v-else>
+        </div>
+      </UForm>
+
+      <template v-else>
+        <div class="flex items-start justify-between gap-4 mb-6">
+          <div class="flex-1">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+              {{ issue.title }}
+            </h1>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <UBadge :color="statusColors[issue?.status ?? 'pending']" size="lg">
+              {{ statusOptions.find(s => s.value === issue?.status)?.label }}
+            </UBadge>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
+          <div v-if="issue.entity" class="flex items-center gap-2 text-gray-500">
+            <UIcon name="i-lucide-building-2" class="w-4 h-4" />
+            <span>{{ issue.entity.name }}</span>
+          </div>
+          <div v-if="issue.address" class="flex items-center gap-2 text-gray-500">
+            <UIcon name="i-lucide-map-pin" class="w-4 h-4" />
+            <span>{{ issue.address }}</span>
+          </div>
+          <div class="flex items-center gap-2 text-gray-500">
+            <UIcon name="i-lucide-calendar" class="w-4 h-4" />
+            <span>{{ t('issue.created') }} {{ formatDate(issue.createdAt) }}</span>
+          </div>
+          <div v-if="issue.aiConfidence" class="flex items-center gap-2 text-gray-500">
+            <UIcon name="i-lucide-sparkles" class="w-4 h-4" />
+            <span>{{ t('issue.aiConfidence') }}: {{ Math.round(Number(issue.aiConfidence) * 100) }}%</span>
+          </div>
+        </div>
+
+        <UCard class="mb-6">
+          <template #header>
+            <h2 class="font-medium">{{ t('issue.description') }}</h2>
+          </template>
+
+          <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+            {{ issue.description }}
+          </p>
+        </UCard>
+
+        <div
+          v-if="issue.latitude && issue.longitude"
+          class="mb-6"
+        >
+          <h2 class="font-medium mb-3">{{ t('issue.location') }}</h2>
+          <div class="h-64 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+            <IssueLocationPicker
+              :latitude="Number(issue.latitude)"
+              :longitude="Number(issue.longitude)"
+              :address="issue.address"
+            />
+          </div>
+        </div>
+
+        <div class="flex gap-3">
           <UButton
             color="neutral"
             variant="outline"
             icon="i-lucide-pencil"
             @click="startEditing"
           >
-            Edit
+            {{ t('common.edit') }}
           </UButton>
-        </template>
-      </div>
+        </div>
+      </template>
     </div>
   </UContainer>
 </template>

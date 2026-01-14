@@ -1,4 +1,7 @@
 <script setup lang="ts">
+const { t } = useI18n()
+const toast = useToast()
+
 const props = defineProps<{
   latitude?: number | null
   longitude?: number | null
@@ -132,7 +135,7 @@ async function searchAddress() {
 
 function getCurrentLocation() {
   if (!navigator.geolocation) {
-    alert('Geolocation is not supported by your browser')
+    toast.add({ title: t('location.geolocationNotSupported'), color: 'warning' })
     return
   }
 
@@ -169,8 +172,8 @@ function getCurrentLocation() {
         { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
       )
     } else {
-      // Permission denied (Code 1) or other errors -> Show alert
-      alert(`Unable to get location: ${error.message}. Please select location manually on the map.`)
+      // Permission denied (Code 1) or other errors -> Show toast
+      toast.add({ title: t('location.locationError'), color: 'warning' })
       isLoadingLocation.value = false
     }
   }
@@ -194,7 +197,7 @@ watch(() => props.address, (newAddress) => {
     <div class="flex gap-2">
       <UInput
         v-model="addressInput"
-        placeholder="Enter address or click on map"
+        :placeholder="t('location.enterAddress')"
         class="flex-1"
         @keyup.enter="searchAddress"
       />
@@ -223,7 +226,7 @@ watch(() => props.address, (newAddress) => {
     </div>
 
     <p v-if="latitude && longitude" class="text-xs text-gray-500">
-      Coordinates: {{ latitude.toFixed(6) }}, {{ longitude.toFixed(6) }}
+      {{ t('location.coordinates') }}: {{ latitude.toFixed(6) }}, {{ longitude.toFixed(6) }}
     </p>
   </div>
 </template>

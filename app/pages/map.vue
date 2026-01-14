@@ -370,9 +370,12 @@ async function openCreateModal() {
     <!-- Category Filters (Interactive) - ClientOnly to prevent i18n hydration mismatch -->
     <ClientOnly>
       <div class="absolute top-20 left-4 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-3 z-40 max-w-[160px]">
-        
+
+        <!-- Card Title -->
+        <div class="text-xs font-semibold text-gray-700 dark:text-gray-200 mb-3">{{ t('map.filters') }}</div>
+
         <!-- View Options -->
-        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Vista</div>
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t('map.view') }}</div>
         <button
           class="flex items-center gap-2 text-xs w-full hover:bg-gray-50 dark:hover:bg-gray-800 rounded px-1.5 py-1 transition-all duration-200 mb-2"
           :class="showPois ? 'bg-gray-50 dark:bg-gray-800 font-medium' : 'opacity-70'"
@@ -386,7 +389,7 @@ async function openCreateModal() {
 
         <div class="h-px bg-gray-100 dark:bg-gray-800 my-2" />
 
-        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t('map.filterByType') }}</div>
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t('map.type') }}</div>
         <div class="space-y-1">
           <button
             v-for="(config, key) in categoryConfig"

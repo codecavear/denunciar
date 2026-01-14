@@ -1,7 +1,11 @@
 <script setup lang="ts">
+import { LazyAuthLoginModal } from '#components'
+
 const { t, locale, locales, setLocale } = useI18n()
 const { loggedIn } = useUserSession()
 const route = useRoute()
+const overlay = useOverlay()
+const loginModal = overlay.create(LazyAuthLoginModal)
 
 const items = computed(() => {
   const baseItems = [{
@@ -34,6 +38,10 @@ const localeItems = computed(() => {
     onSelect: () => setLocale(l.code as 'en' | 'es')
   }))
 })
+
+async function openLogin() {
+  await loginModal.open({}).result
+}
 </script>
 
 <template>
@@ -89,14 +97,14 @@ const localeItems = computed(() => {
           icon="i-lucide-log-in"
           color="primary"
           variant="ghost"
-          to="/login"
           class="lg:hidden"
+          @click="openLogin"
         />
         <UButton
           :label="t('nav.getStarted')"
           color="primary"
-          to="/login"
           class="hidden lg:inline-flex"
+          @click="openLogin"
         />
       </template>
     </template>
@@ -135,8 +143,8 @@ const localeItems = computed(() => {
         v-else
         :label="t('nav.getStarted')"
         color="primary"
-        to="/login"
         block
+        @click="openLogin"
       />
     </template>
   </UHeader>

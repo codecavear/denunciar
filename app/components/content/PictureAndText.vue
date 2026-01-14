@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { UCard } from '#components'
-
 defineProps<{
   reverse?: boolean
   card?: boolean
@@ -8,7 +6,7 @@ defineProps<{
 </script>
 
 <template>
-  <component :is="card ? UCard : 'div'">
+  <component :is="card ? 'UCard' : 'div'">
     <div class="grid grid-cols-3 items-center w-full gap-x-8">
       <div :class="{ 'order-2': reverse }">
         <slot name="image" />

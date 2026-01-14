@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import * as z from 'zod'
+import type { FormSubmitEvent } from '@nuxt/ui'
+
 const props = defineProps<{
   initialLocation?: { lat: number; lng: number } | null
 }>()
@@ -26,15 +29,28 @@ const categoryOptions = [
   { label: 'Otro', value: 'other' }
 ]
 
-const form = ref({
+const issueSchema = z.object({
+  title: z.string().min(1, t('validation.titleRequired')).max(200),
+  description: z.string().min(1, t('validation.descriptionRequired')).max(2000),
+  image: z.object({ url: z.string(), publicId: z.string() }).nullable().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
+  address: z.string().nullable().optional(),
+  entityId: z.string().nullable().optional(),
+  category: z.enum(['pothole', 'trash', 'lighting', 'security', 'trees', 'water', 'infrastructure', 'other'])
+})
+
+type IssueSchema = z.output<typeof issueSchema>
+
+const state = reactive<Partial<IssueSchema>>({
   title: '',
   description: '',
-  image: null as { url: string; publicId: string } | null,
-  latitude: null as number | null,
-  longitude: null as number | null,
-  address: null as string | null,
-  entityId: null as string | null,
-  category: 'other' // Default
+  image: null,
+  latitude: null,
+  longitude: null,
+  address: null,
+  entityId: null,
+  category: 'other'
 })
 
 const aiSuggestion = ref<{ entityId: string | null; confidence: number; reason: string } | null>(null)
@@ -42,21 +58,21 @@ const aiSuggestion = ref<{ entityId: string | null; confidence: number; reason: 
 // Set initial location when provided
 onMounted(() => {
   if (props.initialLocation) {
-    form.value.latitude = props.initialLocation.lat
-    form.value.longitude = props.initialLocation.lng
+    state.latitude = props.initialLocation.lat
+    state.longitude = props.initialLocation.lng
   }
 })
 
 async function classifyIssue() {
-  if (!form.value.description) return
+  if (!state.description) return
 
   isClassifying.value = true
   try {
     const result = await $fetch<{ entityId: string | null; confidence: number; reason: string }>('/api/ai/classify', {
       method: 'POST',
       body: {
-        description: form.value.description,
-        imageUrl: form.value.image?.url
+        description: state.description,
+        imageUrl: state.image?.url
       }
     })
     aiSuggestion.value = result
@@ -69,39 +85,34 @@ async function classifyIssue() {
 
 // Debounced classification
 let classifyTimeout: ReturnType<typeof setTimeout> | null = null
-watch(() => form.value.description, (newDesc) => {
+watch(() => state.description, (newDesc) => {
   if (classifyTimeout) clearTimeout(classifyTimeout)
   if (newDesc && newDesc.length > 20) {
     classifyTimeout = setTimeout(classifyIssue, 1000)
   }
 })
 
-watch(() => form.value.image, () => {
-  if (form.value.description && form.value.description.length > 20) {
+watch(() => state.image, () => {
+  if (state.description && state.description.length > 20) {
     classifyIssue()
   }
 })
 
-async function submitForm() {
-  if (!form.value.title || !form.value.description) {
-    toast.add({ title: t('issue.fillRequired'), color: 'error' })
-    return
-  }
-
+async function onSubmit(event: FormSubmitEvent<IssueSchema>) {
   isSubmitting.value = true
   try {
     const issue = await $fetch('/api/issues', {
       method: 'POST',
       body: {
-        title: form.value.title,
-        description: form.value.description,
-        imageUrl: form.value.image?.url,
-        imagePublicId: form.value.image?.publicId,
-        latitude: form.value.latitude,
-        longitude: form.value.longitude,
-        address: form.value.address,
-        entityId: form.value.entityId,
-        category: form.value.category,
+        title: event.data.title,
+        description: event.data.description,
+        imageUrl: event.data.image?.url,
+        imagePublicId: event.data.image?.publicId,
+        latitude: event.data.latitude,
+        longitude: event.data.longitude,
+        address: event.data.address,
+        entityId: event.data.entityId,
+        category: event.data.category,
         aiConfidence: aiSuggestion.value?.confidence
       }
     })
@@ -128,53 +139,51 @@ function close() {
     :ui="{ body: 'max-h-[70vh] overflow-y-auto' }"
   >
     <template #body>
-      <form id="issue-form" class="space-y-4" @submit.prevent="submitForm">
-        <UFormField :label="t('issue.photo')">
-          <IssueImageUploader v-model="form.image" />
+      <UForm id="issue-form" :schema="issueSchema" :state="state" class="space-y-4" @submit="onSubmit">
+        <UFormField :label="t('issue.photo')" name="image">
+          <IssueImageUploader v-model="state.image" />
         </UFormField>
 
-        <UFormField :label="t('issue.title')" required>
+        <UFormField :label="t('issue.title')" name="title" required>
           <UInput
-            v-model="form.title"
+            v-model="state.title"
             :placeholder="t('issue.titlePlaceholder')"
             class="w-full"
           />
         </UFormField>
 
-        <UFormField :label="t('issue.description')" required>
+        <UFormField :label="t('issue.description')" name="description" required>
           <UTextarea
-            v-model="form.description"
+            v-model="state.description"
             :placeholder="t('issue.descriptionPlaceholder')"
             :rows="3"
             class="w-full"
           />
         </UFormField>
 
-        <UFormField :label="t('issue.category')" required>
-          <select
-            v-model="form.category"
-            class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <option v-for="cat in categoryOptions" :key="cat.value" :value="cat.value">
-              {{ cat.label }}
-            </option>
-          </select>
+        <UFormField :label="t('issue.category')" name="category" required>
+          <USelectMenu
+            v-model="state.category"
+            :items="categoryOptions"
+            value-key="value"
+            class="w-full"
+          />
         </UFormField>
 
-        <UFormField :label="t('issue.location')">
+        <UFormField :label="t('issue.location')" name="address">
           <IssueLocationPicker
-            v-model:latitude="form.latitude"
-            v-model:longitude="form.longitude"
-            v-model:address="form.address"
+            v-model:latitude="state.latitude"
+            v-model:longitude="state.longitude"
+            v-model:address="state.address"
           />
         </UFormField>
 
         <!-- Department Hidden as per user request -->
         <div class="hidden">
-           <UFormField :label="t('issue.department')">
+           <UFormField :label="t('issue.department')" name="entityId">
             <div class="relative">
               <IssueEntitySelector
-                v-model="form.entityId"
+                v-model="state.entityId"
                 :ai-suggestion="aiSuggestion"
               />
               <div
@@ -186,7 +195,7 @@ function close() {
             </div>
            </UFormField>
         </div>
-      </form>
+      </UForm>
     </template>
 
     <template #footer>
@@ -198,10 +207,11 @@ function close() {
         {{ t('common.cancel') }}
       </UButton>
       <UButton
+        type="submit"
+        form="issue-form"
         color="primary"
         :loading="isSubmitting"
         class="flex-1"
-        @click="submitForm"
       >
         {{ t('issue.submitReport') }}
       </UButton>

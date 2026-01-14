@@ -41,10 +41,40 @@
     "confirmIssue": "Confirm Issue",
     "confirmed": "Confirmed",
     "markResolved": "Mark Resolved",
-    "issueMarkedResolved": "Issue marked as resolved"
+    "issueMarkedResolved": "Issue marked as resolved",
+    "filters": "Filters",
+    "view": "View",
+    "type": "Type",
+    "status": "Status"
+  },
+  "validation": {
+    "titleRequired": "Title is required",
+    "descriptionRequired": "Description is required",
+    "invalidEmail": "Please enter a valid email address"
+  },
+  "location": {
+    "enterAddress": "Enter address or click on map",
+    "geolocationNotSupported": "Geolocation is not supported by your browser",
+    "locationError": "Unable to get location. Please select manually on the map.",
+    "coordinates": "Coordinates"
+  },
+  "upload": {
+    "invalidFileType": "Please select an image file",
+    "fileTooLarge": "Image must be less than 10MB",
+    "uploadFailed": "Failed to upload image",
+    "uploading": "Uploading...",
+    "clickOrDrag": "Click or drag an image here",
+    "maxSize": "PNG, JPG, WebP up to 10MB"
+  },
+  "entity": {
+    "selectDepartment": "Select department",
+    "aiSuggestion": "AI Suggestion",
+    "confidence": "Confidence",
+    "accept": "Accept"
   },
   "issue": {
     "reportAnIssue": "Report an Issue",
+    "helpCommunity": "Help improve your community by reporting problems",
     "photo": "Photo",
     "title": "Title",
     "titlePlaceholder": "Brief title for the issue",
@@ -52,13 +82,19 @@
     "descriptionPlaceholder": "Describe the issue in detail...",
     "location": "Location",
     "department": "Department",
+    "category": "Category",
     "submitReport": "Submit Report",
     "reportCreated": "Report created successfully",
     "reportFailed": "Failed to create report",
     "fillRequired": "Please fill in title and description",
     "confirmFailed": "Failed to confirm issue",
     "issueDeleted": "Issue deleted",
-    "deleteFailed": "Failed to delete issue"
+    "deleteFailed": "Failed to delete issue",
+    "notFound": "Issue not found",
+    "created": "Created",
+    "aiConfidence": "AI Confidence",
+    "changesSaved": "Changes saved",
+    "saveFailed": "Failed to save changes"
   },
   "entities": {
     "title": "Government Departments",

@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import { LazyAuthLoginModal } from '#components'
+
 const { t, locale, locales, setLocale } = useI18n()
 const { loggedIn } = useUserSession()
+const overlay = useOverlay()
+const loginModal = overlay.create(LazyAuthLoginModal)
 
 const localeItems = computed(() => {
   return (locales.value as Array<{ code: string; name: string }>).map(l => ({
@@ -8,6 +12,10 @@ const localeItems = computed(() => {
     onSelect: () => setLocale(l.code as 'en' | 'es')
   }))
 })
+
+async function openLogin() {
+  await loginModal.open({}).result
+}
 </script>
 
 <template>
@@ -52,7 +60,7 @@ const localeItems = computed(() => {
             icon="i-lucide-log-in"
             color="primary"
             size="sm"
-            to="/login"
+            @click="openLogin"
           />
         </div>
       </div>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { t } = useI18n()
+
 const props = defineProps<{
   modelValue?: { url: string; publicId: string } | null
 }>()
@@ -21,12 +23,12 @@ async function handleFiles(files: FileList | null) {
   if (!file) return
 
   if (!file.type.startsWith('image/')) {
-    error.value = 'Please select an image file'
+    error.value = t('upload.invalidFileType')
     return
   }
 
   if (file.size > 10 * 1024 * 1024) {
-    error.value = 'Image must be less than 10MB'
+    error.value = t('upload.fileTooLarge')
     return
   }
 
@@ -44,7 +46,7 @@ async function handleFiles(files: FileList | null) {
 
     emit('update:modelValue', { url: result.url, publicId: result.publicId })
   } catch (e) {
-    error.value = 'Failed to upload image'
+    error.value = t('upload.uploadFailed')
     console.error(e)
   } finally {
     isUploading.value = false
@@ -107,10 +109,10 @@ function removeImage() {
         class="w-12 h-12 mx-auto text-gray-400"
       />
       <p class="mt-2 text-sm text-gray-500">
-        {{ isUploading ? 'Uploading...' : 'Click or drag an image here' }}
+        {{ isUploading ? t('upload.uploading') : t('upload.clickOrDrag') }}
       </p>
       <p class="text-xs text-gray-400 mt-1">
-        PNG, JPG, WebP up to 10MB
+        {{ t('upload.maxSize') }}
       </p>
     </div>
 
@@ -130,7 +132,7 @@ function removeImage() {
       />
     </div>
 
-    <p v-if="error" class="text-sm text-red-500">
+    <p v-if="error" class="text-sm text-error">
       {{ error }}
     </p>
   </div>
