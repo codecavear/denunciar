@@ -3,6 +3,7 @@ const { t } = useI18n()
 
 const props = defineProps<{
   modelValue?: { url: string; publicId: string } | null
+  compact?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -88,8 +89,9 @@ function removeImage() {
 
     <div
       v-if="!preview"
-      class="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors"
+      class="border-2 border-dashed rounded-lg text-center cursor-pointer transition-colors"
       :class="[
+        compact ? 'p-4' : 'p-8',
         isDragging ? 'border-primary bg-primary/5' : 'border-gray-300 dark:border-gray-600 hover:border-primary',
         isUploading ? 'opacity-50 pointer-events-none' : ''
       ]"
@@ -101,17 +103,19 @@ function removeImage() {
       <UIcon
         v-if="isUploading"
         name="i-lucide-loader-2"
-        class="w-12 h-12 mx-auto text-gray-400 animate-spin"
+        :class="compact ? 'w-8 h-8' : 'w-12 h-12'"
+        class="mx-auto text-gray-400 animate-spin"
       />
       <UIcon
         v-else
         name="i-lucide-image-plus"
-        class="w-12 h-12 mx-auto text-gray-400"
+        :class="compact ? 'w-8 h-8' : 'w-12 h-12'"
+        class="mx-auto text-gray-400"
       />
       <p class="mt-2 text-sm text-gray-500">
         {{ isUploading ? t('upload.uploading') : t('upload.clickOrDrag') }}
       </p>
-      <p class="text-xs text-gray-400 mt-1">
+      <p v-if="!compact" class="text-xs text-gray-400 mt-1">
         {{ t('upload.maxSize') }}
       </p>
     </div>
@@ -120,7 +124,8 @@ function removeImage() {
       <img
         :src="preview"
         alt="Preview"
-        class="w-full max-h-64 object-cover rounded-lg"
+        :class="compact ? 'max-h-32' : 'max-h-64'"
+        class="w-full object-cover rounded-lg"
       >
       <UButton
         icon="i-lucide-x"

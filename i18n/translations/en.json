@@ -104,6 +104,7 @@
     "photo": "Photo",
     "title": "Title",
     "titlePlaceholder": "Brief title for the issue",
+    "titleSelectOrWrite": "Select or write a title",
     "description": "Description",
     "descriptionPlaceholder": "Describe the issue in detail...",
     "location": "Location",

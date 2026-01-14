@@ -16,19 +16,6 @@ const toast = useToast()
 const isSubmitting = ref(false)
 const isClassifying = ref(false)
 
-// Categories - hardcoded to avoid i18n hydration issues
-const { categoryColors } = useMarkerIcon()
-const categoryOptions = [
-  { label: 'Bache', value: 'pothole' },
-  { label: 'Basura', value: 'trash' },
-  { label: 'Alumbrado', value: 'lighting' },
-  { label: 'Seguridad', value: 'security' },
-  { label: 'Arbolado', value: 'trees' },
-  { label: 'Agua', value: 'water' },
-  { label: 'Infraestructura', value: 'infrastructure' },
-  { label: 'Otro', value: 'other' }
-]
-
 const issueSchema = z.object({
   title: z.string().min(1, t('validation.titleRequired')).max(200),
   description: z.string().min(1, t('validation.descriptionRequired')).max(2000),
@@ -52,6 +39,30 @@ const state = reactive<Partial<IssueSchema>>({
   entityId: null,
   category: 'other'
 })
+
+// Suggested titles per category
+const titleSuggestions: Record<string, string[]> = {
+  pothole: ['Bache en la calle', 'Bache en vereda', 'Hundimiento en asfalto'],
+  trash: ['Basura acumulada', 'Contenedor desbordado', 'Residuos en vereda'],
+  lighting: ['Luz quemada', 'Poste sin luz', 'Luminaria intermitente'],
+  security: ['Zona insegura', 'Falta de vigilancia', 'Vandalismo'],
+  trees: ['Arbol caido', 'Rama peligrosa', 'Arbol seco', 'Poda necesaria'],
+  water: ['Perdida de agua', 'Cano roto', 'Alcantarilla tapada', 'Inundacion'],
+  infrastructure: ['Vereda rota', 'Señal danada', 'Banco roto', 'Reja danada'],
+  other: ['Otro problema']
+}
+
+const currentSuggestions = computed(() => {
+  return titleSuggestions[state.category || 'other'] || []
+})
+
+watch(() => state.category, () => {
+  state.title = ''
+})
+
+function onCreateTitle(item: string) {
+  state.title = item
+}
 
 const aiSuggestion = ref<{ entityId: string | null; confidence: number; reason: string } | null>(null)
 
@@ -136,19 +147,30 @@ function close() {
   <UModal
     :title="t('issue.reportAnIssue')"
     :close="{ onClick: close }"
-    :ui="{ body: 'max-h-[70vh] overflow-y-auto' }"
+    :ui="{
+      content: 'sm:max-w-lg max-sm:h-full max-sm:max-h-full max-sm:rounded-none',
+      body: 'max-h-[70vh] max-sm:max-h-none overflow-y-auto flex-1',
+      footer: 'max-sm:mt-auto'
+    }"
   >
     <template #body>
       <UForm id="issue-form" :schema="issueSchema" :state="state" class="space-y-4" @submit="onSubmit">
+        <UFormField :label="t('issue.category')" name="category" required>
+          <IssueCategoryBadges v-model="state.category" />
+        </UFormField>
+
         <UFormField :label="t('issue.photo')" name="image">
-          <IssueImageUploader v-model="state.image" />
+          <IssueImageUploader v-model="state.image" compact />
         </UFormField>
 
         <UFormField :label="t('issue.title')" name="title" required>
-          <UInput
+          <UInputMenu
             v-model="state.title"
-            :placeholder="t('issue.titlePlaceholder')"
+            :items="currentSuggestions"
+            :placeholder="t('issue.titleSelectOrWrite')"
+            create-item
             class="w-full"
+            @create="onCreateTitle"
           />
         </UFormField>
 
@@ -156,16 +178,7 @@ function close() {
           <UTextarea
             v-model="state.description"
             :placeholder="t('issue.descriptionPlaceholder')"
-            :rows="3"
-            class="w-full"
-          />
-        </UFormField>
-
-        <UFormField :label="t('issue.category')" name="category" required>
-          <USelectMenu
-            v-model="state.category"
-            :items="categoryOptions"
-            value-key="value"
+            :rows="2"
             class="w-full"
           />
         </UFormField>
@@ -175,6 +188,7 @@ function close() {
             v-model:latitude="state.latitude"
             v-model:longitude="state.longitude"
             v-model:address="state.address"
+            compact
           />
         </UFormField>
 

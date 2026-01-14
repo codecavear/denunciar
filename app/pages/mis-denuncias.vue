@@ -41,13 +41,7 @@ const statusOptions = computed(() => [
           {{ t('dashboard.subtitle') }}
         </p>
       </div>
-      <UButton
-        to="/issues/new"
-        icon="i-lucide-plus"
-        color="primary"
-      >
-        {{ t('dashboard.newReport') }}
-      </UButton>
+      <CreateReportButton @created="refresh" />
     </div>
 
     <div class="mb-6">
@@ -78,14 +72,7 @@ const statusOptions = computed(() => [
       <p class="mt-2 text-gray-500">
         {{ t('dashboard.noReportsDescription') }}
       </p>
-      <UButton
-        to="/issues/new"
-        icon="i-lucide-plus"
-        color="primary"
-        class="mt-4"
-      >
-        {{ t('dashboard.createReport') }}
-      </UButton>
+      <CreateReportButton class="mt-4" @created="refresh" />
     </div>
 
     <div v-else class="flex flex-col gap-4">

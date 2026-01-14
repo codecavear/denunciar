@@ -6,6 +6,7 @@ const props = defineProps<{
   latitude?: number | null
   longitude?: number | null
   address?: string | null
+  compact?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -216,7 +217,10 @@ watch(() => props.address, (newAddress) => {
       />
     </div>
 
-    <div class="relative w-full h-64 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden">
+    <div
+      class="relative w-full rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden"
+      :class="compact ? 'h-40' : 'h-64'"
+    >
       <ClientOnly>
         <div ref="mapContainer" class="w-full h-full" />
         <div v-if="!isMapLoaded" class="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 z-10">

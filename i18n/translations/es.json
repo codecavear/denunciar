@@ -114,6 +114,7 @@
     "photo": "Foto",
     "title": "Titulo",
     "titlePlaceholder": "Titulo breve de la denuncia",
+    "titleSelectOrWrite": "Selecciona o escribi un titulo",
     "description": "Descripcion",
     "descriptionPlaceholder": "Describe el problema en detalle...",
     "location": "Ubicacion",
