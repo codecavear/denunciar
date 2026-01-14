@@ -25,7 +25,7 @@ async function openLogin() {
       <div class="flex items-center justify-between p-4">
         <NuxtLink
           to="/"
-          class="pointer-events-auto flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg"
+          class="pointer-events-auto flex items-center gap-3 px-4 py-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg w-[160px]"
         >
           <UIcon
             name="i-lucide-megaphone"
