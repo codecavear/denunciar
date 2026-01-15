@@ -1,6 +1,6 @@
 {
   "name": "reportar",
-  "description": "Citizen issue reporting app with AI-powered routing to government departments",
+  "description": "Citizen issue reporting app with AI-powered routing to government departments - Deployed on Railway",
   "private": true,
   "type": "module",
   "scripts": {

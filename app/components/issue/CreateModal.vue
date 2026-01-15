@@ -7,7 +7,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  close: [success: boolean, issue?: { id: string }]
+  close: [result?: { success: boolean; issue?: any }]
 }>()
 
 const { t } = useI18n()
@@ -129,7 +129,7 @@ async function onSubmit(event: FormSubmitEvent<IssueSchema>) {
     })
 
     toast.add({ title: t('issue.reportCreated'), color: 'success' })
-    emit('close', true, issue)
+    emit('close', { success: true, issue })
   } catch (e) {
     toast.add({ title: t('issue.reportFailed'), color: 'error' })
     console.error(e)
@@ -139,7 +139,7 @@ async function onSubmit(event: FormSubmitEvent<IssueSchema>) {
 }
 
 function close() {
-  emit('close', false)
+  emit('close', { success: false })
 }
 </script>
 

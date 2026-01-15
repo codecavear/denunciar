@@ -9,6 +9,11 @@
     "continueGoogle": "Continue with Google",
     "agreementText": "By signing in, you agree to our Terms of Service."
   },
+  "tiers": {
+    "newbie": "Newbie",
+    "citizen": "Citizen",
+    "guardian": "Guardian"
+  },
   "nav": {
     "dashboard": "My Reports",
     "newIssue": "Report Issue",

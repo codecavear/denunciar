@@ -9,6 +9,11 @@
     "continueGoogle": "Continuar con Google",
     "agreementText": "Al iniciar sesion, aceptas nuestros Terminos de Servicio."
   },
+  "tiers": {
+    "newbie": "Novato",
+    "citizen": "Vecino",
+    "guardian": "Referente"
+  },
   "nav": {
     "dashboard": "Mis Reportes",
     "newIssue": "Nuevo Reporte",

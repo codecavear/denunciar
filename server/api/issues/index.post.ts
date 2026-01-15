@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { getDb } from '../../utils/db'
 import { issues } from '../../database/schema'
+import { GamificationService, POINTS } from '../../utils/gamification'
 
 const createIssueSchema = z.object({
   title: z.string().min(1).max(200),
@@ -43,6 +44,15 @@ export default defineEventHandler(async (event) => {
       status: 'pending'
     })
     .returning()
+  
+  // Award Points & Stats
+  // Use try/catch to ensure gamification doesn't block the core response if it fails
+  try {
+    await GamificationService.incrementReportsCreated(session.user.id)
+    await GamificationService.awardPoints(session.user.id, POINTS.CREATE_REPORT)
+  } catch (e) {
+    console.error('Gamification Error:', e)
+  }
 
   return newIssue
 })

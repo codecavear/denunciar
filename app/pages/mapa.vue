@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { Issue, Entity } from '#shared/types'
+import { TIERS } from '#shared/constants'
+import { LazyAuthLoginModal } from '#components'
 
 definePageMeta({
   layout: 'map'
@@ -13,13 +15,15 @@ useSeoMeta({
 
 type PublicIssue = Issue & {
   entity: Entity | null
-  user: { id: string; name: string; avatarUrl: string | null } | null
+  user: { id: string; name: string; avatarUrl: string | null; reputationScore: number } | null
   confirmationCount: number
 }
 
 const config = useRuntimeConfig()
 const { loggedIn, user } = useUserSession()
 const toast = useToast()
+const overlay = useOverlay()
+const loginModal = overlay.create(LazyAuthLoginModal)
 
 const mapContainer = ref<HTMLDivElement>()
 const map = shallowRef<google.maps.Map>()
@@ -361,8 +365,8 @@ function hasConfirmed(issue: PublicIssue) {
 
 async function toggleConfirm(issue: PublicIssue) {
   if (!loggedIn.value) {
-    toast.add({ title: t('auth.signInAccess'), color: 'warning' })
-    return
+    await loginModal.open({}).result
+    if (!loggedIn.value) return
   }
 
   isConfirming.value = true
@@ -417,8 +421,19 @@ function formatDate(date: Date | string) {
   })
 }
 
-async function onIssueCreated() {
+async function onIssueCreated(issue?: PublicIssue) {
+  if (issue) {
+    if (issues.value) {
+      issues.value.push(issue)
+    }
+  }
   await refreshIssues()
+}
+
+function getUserTier(score: number = 0) {
+  if (score >= TIERS.GUARDIAN.min) return TIERS.GUARDIAN
+  if (score >= TIERS.CITIZEN.min) return TIERS.CITIZEN
+  return TIERS.NEWBIE
 }
 </script>
 
@@ -535,10 +550,50 @@ async function onIssueCreated() {
       }"
     >
       <template #description>
-        <div v-if="selectedIssue" class="space-y-2">
-          <p class="text-muted text-sm">
-            {{ t('map.reportedBy') }} {{ selectedIssue.user?.name || t('map.anonymous') }} {{ t('map.on') }} {{ formatDate(selectedIssue.createdAt) }}
-          </p>
+        <div v-if="selectedIssue" class="space-y-3">
+          <!-- User Info with Avatar Frame -->
+          <div class="flex items-center gap-3">
+            <div class="relative">
+               <!-- Avatar Frame Ring -->
+               <div 
+                class="absolute -inset-1 rounded-full border-2"
+                :class="{
+                  'border-amber-700': getUserTier(selectedIssue.user?.reputationScore).label === 'tiers.newbie',
+                  'border-slate-400': getUserTier(selectedIssue.user?.reputationScore).label === 'tiers.citizen',
+                  'border-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]': getUserTier(selectedIssue.user?.reputationScore).label === 'tiers.guardian'
+                }"
+               ></div>
+               <UAvatar
+                 :src="selectedIssue.user?.avatarUrl || undefined"
+                 :alt="selectedIssue.user?.name"
+                 size="sm"
+                 class="relative z-10"
+               />
+               <!-- Tier Badge Icon -->
+               <div 
+                class="absolute -bottom-2 -right-2 z-20 bg-white dark:bg-gray-900 rounded-full p-0.5 border border-gray-100 dark:border-gray-800"
+               >
+                 <UIcon 
+                   :name="getUserTier(selectedIssue.user?.reputationScore).icon" 
+                   class="w-3 h-3"
+                   :class="{
+                      'text-amber-700': getUserTier(selectedIssue.user?.reputationScore).label === 'tiers.newbie',
+                      'text-slate-400': getUserTier(selectedIssue.user?.reputationScore).label === 'tiers.citizen',
+                      'text-yellow-400': getUserTier(selectedIssue.user?.reputationScore).label === 'tiers.guardian'
+                   }"
+                 />
+               </div>
+            </div>
+            
+            <div class="flex flex-col">
+              <span class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ selectedIssue.user?.name || t('map.anonymous') }}
+              </span>
+              <span class="text-xs text-gray-500">
+                {{ formatDate(selectedIssue.createdAt) }} • {{ t(getUserTier(selectedIssue.user?.reputationScore).label) }}
+              </span>
+            </div>
+          </div>
           <UBadge
             :color="selectedIssue.status === 'pending' ? 'warning' : selectedIssue.status === 'in_progress' ? 'info' : 'success'"
             variant="subtle"

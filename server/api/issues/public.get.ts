@@ -1,6 +1,6 @@
 import { sql, ne } from 'drizzle-orm'
 import { getDb } from '../../utils/db'
-import { issues, entities, users, issueConfirmations } from '../../database/schema'
+import { issues, entities, users, issueConfirmations, userStats } from '../../database/schema'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -18,6 +18,7 @@ export default defineEventHandler(async (event) => {
         name: users.name,
         avatarUrl: users.avatarUrl
       },
+      reputationScore: userStats.reputationScore,
       confirmationCount: sql<number>`(
         SELECT COUNT(*)::int FROM issue_confirmations
         WHERE issue_confirmations.issue_id = ${issues.id}
@@ -26,12 +27,16 @@ export default defineEventHandler(async (event) => {
     .from(issues)
     .leftJoin(entities, sql`${issues.entityId} = ${entities.id}`)
     .leftJoin(users, sql`${issues.userId} = ${users.id}`)
+    .leftJoin(userStats, sql`${users.id} = ${userStats.userId}`)
     .where(ne(issues.status, 'closed'))
 
-  return result.map(({ issue, entity, user, confirmationCount }) => ({
+  return result.map(({ issue, entity, user, confirmationCount, reputationScore }) => ({
     ...issue,
     entity,
-    user,
+    user: user ? {
+        ...user,
+        reputationScore: Number(reputationScore || 0)
+    } : null,
     confirmationCount: confirmationCount || 0
   }))
 })

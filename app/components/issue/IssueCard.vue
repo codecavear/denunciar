@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Issue, Entity } from '#shared/types'
 import { CONFIRMATION_THRESHOLD } from '#shared/constants'
+import { LazyAuthLoginModal } from '#components'
 
 const props = defineProps<{
   issue: Issue & { entity?: Entity | null }
@@ -29,11 +30,20 @@ function formatDate(date: Date | string) {
   })
 }
 
+const { loggedIn } = useUserSession()
+const overlay = useOverlay()
+const loginModal = overlay.create(LazyAuthLoginModal)
+
 const loading = ref(false)
 
 async function toggleConfirm(e: Event) {
   e.preventDefault() // Prevent navigation to details
   e.stopPropagation()
+  
+  if (!loggedIn.value) {
+    await loginModal.open({}).result
+    if (!loggedIn.value) return
+  }
   
   loading.value = true
   try {
@@ -80,7 +90,7 @@ async function toggleConfirm(e: Event) {
             <div class="flex gap-2">
               <UBadge 
                 v-if="props.issue.confirmationCount >= CONFIRMATION_THRESHOLD"
-                color="orange" 
+                color="primary" 
                 variant="subtle" 
                 size="xs"
                 class="flex-shrink-0 flex items-center gap-1"
@@ -116,7 +126,7 @@ async function toggleConfirm(e: Event) {
           <div class="mt-3 flex items-center justify-end">
             <UButton
               :icon="props.issue.userConfirmed ? 'i-lucide-thumbs-up' : 'i-lucide-thumbs-up'"
-              :color="props.issue.userConfirmed ? 'primary' : 'gray'"
+              :color="props.issue.userConfirmed ? 'primary' : 'neutral'"
               :variant="props.issue.userConfirmed ? 'soft' : 'ghost'"
               size="xs"
               :loading="loading"

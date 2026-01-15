@@ -1,6 +1,7 @@
-import { eq, and } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 import { getDb } from '../../../utils/db'
 import { issueConfirmations, issues } from '../../../database/schema'
+import { GamificationService } from '../../../utils/gamification'
 
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event)
@@ -53,6 +54,32 @@ export default defineEventHandler(async (event) => {
     issueId,
     userId: session.user.id
   })
+
+  // Check new confirmation count
+  const [{ count: newCount }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(issueConfirmations)
+      .where(eq(issueConfirmations.issueId, issueId))
+  
+  // Hardcoded threshold for now, matching the one in shared/constants if we could import it shared
+  // Ideally this should be imported from shared/constants - but for backend we can just define it
+  const THRESHOLD = 5 
+
+  if (newCount === THRESHOLD) {
+    try {
+        await GamificationService.onIssueVerified(issue.userId)
+    } catch (e) {
+        console.error('Gamification Verification Error:', e)
+    }
+  }
+  
+  // Award simple participation point for confirming?
+  // Design says: "+1 (If issue eventually Verified)"
+  // So we don't award it immediately. We would need a batch job or logic to backfill confirmers when verified.
+  // For MVP: We are keeping it simple. Maybe just award +1 for "Helpful" confirmation immediately? 
+  // gamification_design.md says: "+1 (If issue eventually Verified)"
+  // So we should strictly probably do that in onIssueVerified.
+  // Let's modify GamificationService.onIssueVerified to reward confirmers too.
 
   return { confirmed: true }
 })

@@ -28,6 +28,14 @@ const statusOptions = computed(() => [
   { label: t('status.resolved'), value: 'resolved' },
   { label: t('status.closed'), value: 'closed' }
 ])
+
+function onIssueCreated(issue?: any) {
+  if (issue && issues.value) {
+    // Optimistic update
+    issues.value.unshift(issue)
+  }
+  refresh()
+}
 </script>
 
 <template>
@@ -41,7 +49,7 @@ const statusOptions = computed(() => [
           {{ t('dashboard.subtitle') }}
         </p>
       </div>
-      <CreateReportButton @created="refresh" />
+      <CreateReportButton @created="onIssueCreated" />
     </div>
 
     <div class="mb-6">
@@ -72,7 +80,7 @@ const statusOptions = computed(() => [
       <p class="mt-2 text-gray-500">
         {{ t('dashboard.noReportsDescription') }}
       </p>
-      <CreateReportButton class="mt-4" @created="refresh" />
+      <CreateReportButton class="mt-4" @created="onIssueCreated" />
     </div>
 
     <div v-else class="flex flex-col gap-4">

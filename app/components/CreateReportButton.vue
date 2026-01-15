@@ -1,22 +1,29 @@
 <script setup lang="ts">
-import { LazyIssueCreateModal } from '#components'
+import { LazyIssueCreateModal, LazyAuthLoginModal } from '#components'
 
 const props = defineProps<{
   variant?: 'default' | 'map'
 }>()
 
 const emit = defineEmits<{
-  created: []
+  created: [issue?: any]
 }>()
 
 const { t } = useI18n()
+const { loggedIn } = useUserSession()
 const overlay = useOverlay()
 const issueModal = overlay.create(LazyIssueCreateModal)
+const loginModal = overlay.create(LazyAuthLoginModal)
 
 async function openCreateModal() {
-  const result = await issueModal.open({}).result
-  if (result) {
-    emit('created')
+  if (!loggedIn.value) {
+    await loginModal.open({}).result
+    if (!loggedIn.value) return
+  }
+
+  const result = await issueModal.open({}).result as any
+  if (result && result.success) {
+    emit('created', result.issue)
   }
 }
 </script>
