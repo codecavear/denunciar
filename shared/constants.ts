@@ -1,0 +1,2 @@
+export const CONFIRMATION_THRESHOLD = 5
+export const CONFIRMATION_REWARD = 10

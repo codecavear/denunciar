@@ -1,6 +1,6 @@
-import { eq, desc, and } from 'drizzle-orm'
+import { eq, desc, and, sql, count } from 'drizzle-orm'
 import { getDb } from '../../utils/db'
-import { issues, entities, users } from '../../database/schema'
+import { issues, entities, users, issueConfirmations } from '../../database/schema'
 
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event)
@@ -23,19 +23,34 @@ export default defineEventHandler(async (event) => {
 
   const result = await db
     .select({
-      issue: issues,
+      issue: {
+        ...issues,
+        // Cast decimal/numeric types to float for JSON safety
+        latitude: sql<number>`CAST(${issues.latitude} AS FLOAT)`,
+        longitude: sql<number>`CAST(${issues.longitude} AS FLOAT)`,
+      },
       entity: entities,
-      user: users
+      user: users,
+      confirmationCount: count(issueConfirmations.id),
+      userConfirmed: sql<boolean>`EXISTS (
+        SELECT 1 FROM ${issueConfirmations} ic 
+        WHERE ic.issue_id = ${issues.id} 
+        AND ic.user_id = ${session.user.id}
+      )`
     })
     .from(issues)
     .leftJoin(entities, eq(issues.entityId, entities.id))
     .leftJoin(users, eq(issues.userId, users.id))
+    .leftJoin(issueConfirmations, eq(issues.id, issueConfirmations.issueId))
     .where(whereConditions)
+    .groupBy(issues.id, entities.id, users.id)
     .orderBy(desc(issues.createdAt))
 
-  return result.map(({ issue, entity, user }) => ({
+  return result.map(({ issue, entity, user, confirmationCount, userConfirmed }) => ({
     ...issue,
     entity,
-    user
+    user,
+    confirmationCount,
+    userConfirmed
   }))
 })

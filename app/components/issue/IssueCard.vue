@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { Issue, Entity } from '#shared/types'
+import { CONFIRMATION_THRESHOLD } from '#shared/constants'
 
-defineProps<{
+const props = defineProps<{
   issue: Issue & { entity?: Entity | null }
 }>()
 
@@ -27,18 +28,40 @@ function formatDate(date: Date | string) {
     day: 'numeric'
   })
 }
+
+const loading = ref(false)
+
+async function toggleConfirm(e: Event) {
+  e.preventDefault() // Prevent navigation to details
+  e.stopPropagation()
+  
+  loading.value = true
+  try {
+    const res = await $fetch<{ confirmed: boolean }>(`/api/issues/${props.issue.id}/confirm`, {
+      method: 'POST'
+    })
+    
+    // Mutate local prop state for instant feedback (Vue reactive)
+    props.issue.userConfirmed = res.confirmed
+    props.issue.confirmationCount += res.confirmed ? 1 : -1
+  } catch (err) {
+    console.error('Failed to toggle confirmation', err)
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
-  <NuxtLink :to="`/issues/${issue.id}`">
+  <NuxtLink :to="`/issues/${props.issue.id}`">
     <UCard
       class="hover:shadow-md transition-shadow cursor-pointer"
     >
       <div class="flex gap-4">
-        <div v-if="issue.imageUrl" class="flex-shrink-0">
+        <div v-if="props.issue.imageUrl" class="flex-shrink-0">
           <img
-            :src="issue.imageUrl"
-            :alt="issue.title"
+            :src="props.issue.imageUrl"
+            :alt="props.issue.title"
             class="w-24 h-24 object-cover rounded-lg"
           >
         </div>
@@ -52,30 +75,56 @@ function formatDate(date: Date | string) {
         <div class="flex-1 min-w-0">
           <div class="flex items-start justify-between gap-1">
             <h3 class="font-medium text-gray-900 dark:text-white truncate">
-              {{ issue.title }}
+              {{ props.issue.title }}
             </h3>
-            <UBadge :color="statusColors[issue.status]" variant="subtle" size="xs" class="flex-shrink-0">
-              {{ getStatusLabel(issue.status) }}
-            </UBadge>
+            <div class="flex gap-2">
+              <UBadge 
+                v-if="props.issue.confirmationCount >= CONFIRMATION_THRESHOLD"
+                color="orange" 
+                variant="subtle" 
+                size="xs"
+                class="flex-shrink-0 flex items-center gap-1"
+              >
+                <UIcon name="i-lucide-flame" class="w-3 h-3" />
+                Verified
+              </UBadge>
+              <UBadge :color="statusColors[props.issue.status]" variant="subtle" size="xs" class="flex-shrink-0">
+                {{ getStatusLabel(props.issue.status) }}
+              </UBadge>
+            </div>
           </div>
 
           <p class="text-sm text-gray-500 mt-1 line-clamp-2">
-            {{ issue.description }}
+            {{ props.issue.description }}
           </p>
 
           <div class="flex items-center gap-4 mt-2 text-xs text-gray-400">
-            <span v-if="issue.entity" class="flex items-center gap-1">
+            <span v-if="props.issue.entity" class="flex items-center gap-1">
               <UIcon name="i-lucide-building-2" class="w-3 h-3" />
-              {{ issue.entity.name }}
+              {{ props.issue.entity.name }}
             </span>
-            <span v-if="issue.address" class="flex items-center gap-1 truncate">
+            <span v-if="props.issue.address" class="flex items-center gap-1 truncate">
               <UIcon name="i-lucide-map-pin" class="w-3 h-3" />
-              {{ issue.address }}
+              {{ props.issue.address }}
             </span>
             <span class="flex items-center gap-1">
               <UIcon name="i-lucide-calendar" class="w-3 h-3" />
-              {{ formatDate(issue.createdAt) }}
+              {{ formatDate(props.issue.createdAt) }}
             </span>
+          </div>
+
+          <div class="mt-3 flex items-center justify-end">
+            <UButton
+              :icon="props.issue.userConfirmed ? 'i-lucide-thumbs-up' : 'i-lucide-thumbs-up'"
+              :color="props.issue.userConfirmed ? 'primary' : 'gray'"
+              :variant="props.issue.userConfirmed ? 'soft' : 'ghost'"
+              size="xs"
+              :loading="loading"
+              class="rounded-full"
+              @click="toggleConfirm"
+            >
+              {{ props.issue.confirmationCount }}
+            </UButton>
           </div>
         </div>
       </div>

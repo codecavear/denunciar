@@ -34,11 +34,13 @@ export interface Issue {
   description: string
   imageUrl: string | null
   imagePublicId: string | null
-  latitude: string | null
-  longitude: string | null
+  latitude: number | null
+  longitude: number | null
   address: string | null
   status: IssueStatus
   aiConfidence: string | null
+  confirmationCount: number
+  userConfirmed: boolean
   createdAt: Date
   updatedAt: Date
 }
